@@ -15,9 +15,8 @@ const DatePicker: React.FC = () => {
   };
 
   return (
-    <IonContent className="ion-padding">
       <IonGrid>
-         <IonRow><p>PLease pick a date:</p></IonRow>
+         <IonRow><p>Please pick a date:</p></IonRow>
           <IonRow>      
             <IonButton onClick={() => setShowPicker(true)}>{selectedDate}</IonButton>
             <IonModal isOpen={showPicker} onDidDismiss={() => setShowPicker(false)}>
@@ -34,14 +33,8 @@ const DatePicker: React.FC = () => {
         {/* <IonButton onClick={() => setShowPicker(false)}>Done</IonButton> */}
       </IonModal>
 </IonRow>
- {/* <IonRow>
-  <IonCol>
-     <IonRow><p>Washing machine 1</p></IonRow>
-     <IonRow></IonRow>
-  </IonCol>
- </IonRow> */}
+
       </IonGrid>      
-    </IonContent>
   );
 };
 
