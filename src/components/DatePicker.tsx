@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { IonDatetime, IonItem, IonLabel, IonButton, IonContent, IonModal, IonCol, IonGrid, IonRow } from '@ionic/react';
 import { formatISO, startOfToday, addDays } from 'date-fns';
 
@@ -13,6 +13,14 @@ const DatePicker: React.FC = () => {
     setSelectedDate(e.detail.value as string);
     setShowPicker(false);  // Automatically close the picker when a date is selected
   };
+
+  const dateToBeFetched = selectedDate.split("T")[0];
+
+    useEffect(() => {
+    localStorage.setItem('selectedDate', dateToBeFetched);
+  }, [dateToBeFetched]);
+
+  console.log(dateToBeFetched);
 
   return (
       <IonGrid>
