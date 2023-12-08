@@ -24,7 +24,6 @@ function HomePage() {
 					<IonTitle>Hello</IonTitle>
 				</IonToolbar>
 			</IonHeader>
-
 			<IonContent fullscreen>
 				<DatePicker />
 			</IonContent>
