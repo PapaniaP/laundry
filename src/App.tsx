@@ -30,6 +30,8 @@ import "@ionic/react/css/display.css";
 import "./theme/variables.css";
 import HomePage from "./pages/HomePage";
 import SignInPage from "./pages/SignInPage";
+import ErrorPage from "./pages/ErrorPage";
+import BookingSuccessful from "./pages/BookingSuccessful";
 
 setupIonicReact();
 
@@ -52,6 +54,19 @@ const App: React.FC = () => {
 						>
 							<HomePage />
 						</Route>
+						<Route
+							path="/error"
+							exact={true}
+						>
+							<ErrorPage />
+						</Route>
+						<Route
+							path="/booked"
+							exact={true}
+						>
+							<BookingSuccessful />
+						</Route>
+
 					</IonRouterOutlet>
 				</IonSplitPane>
 			</IonReactRouter>

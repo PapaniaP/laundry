@@ -8,7 +8,7 @@ import {
   IonContent,
   IonButton, IonDatetime, IonItem, IonLabel, IonModal, IonGrid, IonRow, IonCol
 } from "@ionic/react";
-import { useParams } from "react-router";
+import { useHistory } from "react-router";
 import "./HomePage.css";
 
 import TimeButton from "../components/TimeButton";
@@ -68,6 +68,8 @@ function HomePage() {
     console.log(selectedValues);
   }, [selectedValues]);
 
+  const history = useHistory();
+
   const handleBooking = async (event: React.FormEvent) => {
     event.preventDefault(); // Prevent default form submission behavior
 
@@ -92,15 +94,18 @@ function HomePage() {
           uid: "",
           bookedTimes: []
         });
-        alert("Booking successful");
+        history.push('./booked')
         // Possibly redirect or show a success message
       } catch (error) {
+        history.push('/error')
         console.error("Failed to create booking:", error);
       }
     } else {
+
       console.error("No user is currently logged in.");
       // Handle the case where there is no authenticated user
     }
+
   };
 
 
