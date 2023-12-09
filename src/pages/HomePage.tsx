@@ -20,7 +20,7 @@ import "./HomePage.css";
 
 import TimeButton from "../components/TimeButton";
 import { useState, useEffect } from "react";
-import { updateDoc, arrayUnion, doc } from "firebase/firestore";
+import { updateDoc, arrayUnion, doc, onSnapshot, collection } from "firebase/firestore";
 import { db, user } from "../firebase-config";
 import { formatISO, startOfToday, addDays, format, parseISO } from "date-fns";
 import { getAuth } from "firebase/auth";
@@ -32,11 +32,15 @@ interface Booking {
 }
 
 function HomePage() {
-  const [selectedValues, setSelectedValues] = useState<number[]>([]);
+  const [selectedValues, setSelectedValues] = useState<number[]>([]); // this is for updating array
+  const [bookings, setBookings] = useState<Booking[]>([]); // this is for fetching
   const [Booking, setBooking] = useState<Booking>({
     uid: "",
     bookedTimes: [],
   });
+
+
+  // date picker
 
   const [selectedDate, setSelectedDate] = useState<string>(formatISO(startOfToday()));
   const [showPicker, setShowPicker] = useState<boolean>(false);
@@ -56,14 +60,13 @@ function HomePage() {
 
   const dateToBeFetched = selectedDate.split("T")[0];
 
-  useEffect(() => {
-    localStorage.setItem("selectedDate", dateToBeFetched);
-  }, [dateToBeFetched]);
-
   const history = useHistory();
 
   //   const datesCollectionRef = collection(db, "building-1" , dateToBeFetched)
   const dateDocRef = doc(db, "building-1", dateToBeFetched);
+
+
+  // function which runs after you press a time slot button with time span of 2 hours
 
   const handleButtonClick = (value: number) => {
     setSelectedValues((prev) => {
@@ -86,11 +89,12 @@ function HomePage() {
       }
     });
   };
-  // Since setSelectedValues is asynchronous, to see the current state after a click,
-  // you can use the useEffect hook with selectedValues as a dependency.
   useEffect(() => {
     console.log(selectedValues);
   }, [selectedValues]);
+
+
+  //  sending data to firebase
 
   const handleBooking = async (event: React.FormEvent) => {
     event.preventDefault(); // Prevent default form submission behavior
@@ -132,6 +136,38 @@ function HomePage() {
       // Handle the case where there is no authenticated user
     }
   };
+
+  // fetching data from database
+
+  useEffect(() => {
+    // Construct the path to the document for the selected date
+    const dateDocRef = doc(db, "building-1", dateToBeFetched);
+
+    // Start listening to the document
+    const unsubscribe = onSnapshot(dateDocRef, (documentSnapshot) => {
+      if (documentSnapshot.exists()) {
+        const data = documentSnapshot.data();
+        // Assuming 'bookings' is the array within your document
+        const fetchedBookings: Booking[] = data.bookings || [];
+        setBookings(fetchedBookings);
+      } else {
+        // Handle the case where the document does not exist
+        setBookings([]);
+      }
+    }, (error) => {
+      // Handle errors, such as lack of permissions to read the data
+      console.error("Error listening to the document:", error);
+    });
+
+    // Clean up the listener when the component unmounts
+    return () => unsubscribe();
+  }, [dateToBeFetched]); // Re-run the effect if the selected date changes
+
+
+
+  useEffect(() => {
+    console.log(bookings)
+  }), [bookings]
 
 
   return (
@@ -180,8 +216,9 @@ function HomePage() {
           </IonGrid>
           <IonGrid>
             <IonRow>
+              {/* Washer 1 Column */}
               <IonCol>
-                <IonRow> Washer 1</IonRow>
+                <IonRow> <p>Washer 1</p></IonRow>
                 <IonRow>
                   <TimeButton
                     id={1}
@@ -189,6 +226,7 @@ function HomePage() {
                     value={1}
                     onButtonClick={handleButtonClick}
                     isSelected={selectedValues.includes(1)}
+                    isAvailable={!bookings.some((booking) => booking.bookedTimes.includes(1))}
                   />
                 </IonRow>
                 <IonRow>
@@ -198,6 +236,7 @@ function HomePage() {
                     value={2}
                     onButtonClick={handleButtonClick}
                     isSelected={selectedValues.includes(2)}
+                    isAvailable={!bookings.some((booking) => booking.bookedTimes.includes(2))}
                   />
                 </IonRow>
                 <IonRow>
@@ -207,15 +246,17 @@ function HomePage() {
                     value={3}
                     onButtonClick={handleButtonClick}
                     isSelected={selectedValues.includes(3)}
+                    isAvailable={!bookings.some((booking) => booking.bookedTimes.includes(3))}
                   />
                 </IonRow>
                 <IonRow>
                   <TimeButton
                     id={4}
-                    text="13:00 - 15:00" // Updated text for id 4
+                    text="13:00 - 15:00"
                     value={4}
                     onButtonClick={handleButtonClick}
                     isSelected={selectedValues.includes(4)}
+                    isAvailable={!bookings.some((booking) => booking.bookedTimes.includes(4))}
                   />
                 </IonRow>
                 <IonRow>
@@ -225,6 +266,7 @@ function HomePage() {
                     value={5}
                     onButtonClick={handleButtonClick}
                     isSelected={selectedValues.includes(5)}
+                    isAvailable={!bookings.some((booking) => booking.bookedTimes.includes(5))}
                   />
                 </IonRow>
                 <IonRow>
@@ -234,6 +276,7 @@ function HomePage() {
                     value={6}
                     onButtonClick={handleButtonClick}
                     isSelected={selectedValues.includes(6)}
+                    isAvailable={!bookings.some((booking) => booking.bookedTimes.includes(6))}
                   />
                 </IonRow>
                 <IonRow>
@@ -243,12 +286,14 @@ function HomePage() {
                     value={7}
                     onButtonClick={handleButtonClick}
                     isSelected={selectedValues.includes(7)}
+                    isAvailable={!bookings.some((booking) => booking.bookedTimes.includes(7))}
                   />
+
                 </IonRow>
               </IonCol>
 
               <IonCol>
-                <IonRow> Washer 2</IonRow>
+                <IonRow> <p>Washer 2</p></IonRow>
                 <IonRow>
                   <TimeButton
                     id={8}
@@ -256,6 +301,7 @@ function HomePage() {
                     value={8}
                     onButtonClick={handleButtonClick}
                     isSelected={selectedValues.includes(8)}
+                    isAvailable={!bookings.some((booking) => booking.bookedTimes.includes(8))}
                   />
                 </IonRow>
                 <IonRow>
@@ -265,6 +311,7 @@ function HomePage() {
                     value={9}
                     onButtonClick={handleButtonClick}
                     isSelected={selectedValues.includes(9)}
+                    isAvailable={!bookings.some((booking) => booking.bookedTimes.includes(9))}
                   />
                 </IonRow>
                 <IonRow>
@@ -274,6 +321,7 @@ function HomePage() {
                     value={10}
                     onButtonClick={handleButtonClick}
                     isSelected={selectedValues.includes(10)}
+                    isAvailable={!bookings.some((booking) => booking.bookedTimes.includes(10))}
                   />
                 </IonRow>
                 <IonRow>
@@ -283,6 +331,7 @@ function HomePage() {
                     value={11}
                     onButtonClick={handleButtonClick}
                     isSelected={selectedValues.includes(11)}
+                    isAvailable={!bookings.some((booking) => booking.bookedTimes.includes(11))}
                   />
                 </IonRow>
                 <IonRow>
@@ -292,6 +341,7 @@ function HomePage() {
                     value={12}
                     onButtonClick={handleButtonClick}
                     isSelected={selectedValues.includes(12)}
+                    isAvailable={!bookings.some((booking) => booking.bookedTimes.includes(12))}
                   />
                 </IonRow>
                 <IonRow>
@@ -301,6 +351,7 @@ function HomePage() {
                     value={13}
                     onButtonClick={handleButtonClick}
                     isSelected={selectedValues.includes(13)}
+                    isAvailable={!bookings.some((booking) => booking.bookedTimes.includes(13))}
                   />
                 </IonRow>
                 <IonRow>
@@ -310,12 +361,13 @@ function HomePage() {
                     value={14}
                     onButtonClick={handleButtonClick}
                     isSelected={selectedValues.includes(14)}
+                    isAvailable={!bookings.some((booking) => booking.bookedTimes.includes(14))}
                   />
                 </IonRow>
               </IonCol>
 
               <IonCol>
-                <IonRow> Dryer</IonRow>
+                <IonRow> <p>Dryer</p> </IonRow>
                 <IonRow>
                   <TimeButton
                     id={15}
@@ -323,6 +375,7 @@ function HomePage() {
                     value={15}
                     onButtonClick={handleButtonClick}
                     isSelected={selectedValues.includes(15)}
+                    isAvailable={!bookings.some((booking) => booking.bookedTimes.includes(15))}
                   />
                 </IonRow>
                 <IonRow>
@@ -332,6 +385,7 @@ function HomePage() {
                     value={16}
                     onButtonClick={handleButtonClick}
                     isSelected={selectedValues.includes(16)}
+                    isAvailable={!bookings.some((booking) => booking.bookedTimes.includes(16))}
                   />
                 </IonRow>
                 <IonRow>
@@ -341,6 +395,7 @@ function HomePage() {
                     value={17}
                     onButtonClick={handleButtonClick}
                     isSelected={selectedValues.includes(17)}
+                    isAvailable={!bookings.some((booking) => booking.bookedTimes.includes(17))}
                   />
                 </IonRow>
                 <IonRow>
@@ -350,6 +405,7 @@ function HomePage() {
                     value={18}
                     onButtonClick={handleButtonClick}
                     isSelected={selectedValues.includes(18)}
+                    isAvailable={!bookings.some((booking) => booking.bookedTimes.includes(18))}
                   />
                 </IonRow>
                 <IonRow>
@@ -359,6 +415,7 @@ function HomePage() {
                     value={19}
                     onButtonClick={handleButtonClick}
                     isSelected={selectedValues.includes(19)}
+                    isAvailable={!bookings.some((booking) => booking.bookedTimes.includes(19))}
                   />
                 </IonRow>
                 <IonRow>
@@ -368,6 +425,7 @@ function HomePage() {
                     value={20}
                     onButtonClick={handleButtonClick}
                     isSelected={selectedValues.includes(20)}
+                    isAvailable={!bookings.some((booking) => booking.bookedTimes.includes(20))}
                   />
                 </IonRow>
                 <IonRow>
@@ -377,6 +435,7 @@ function HomePage() {
                     value={21}
                     onButtonClick={handleButtonClick}
                     isSelected={selectedValues.includes(21)}
+                    isAvailable={!bookings.some((booking) => booking.bookedTimes.includes(21))}
                   />
                 </IonRow>
               </IonCol>
