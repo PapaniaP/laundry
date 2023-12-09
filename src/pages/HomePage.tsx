@@ -14,8 +14,9 @@ import "./HomePage.css";
 import TimeButton from "../components/TimeButton";
 import { useState, useEffect } from "react";
 import { updateDoc, arrayUnion, doc } from "firebase/firestore";
-import { db } from "../firebase-config";
+import { db, user } from "../firebase-config";
 import { formatISO, startOfToday, addDays } from 'date-fns';
+import { getAuth } from "firebase/auth";
 
 interface Booking {
   uid: string;
@@ -70,29 +71,38 @@ function HomePage() {
   const handleBooking = async (event: React.FormEvent) => {
     event.preventDefault(); // Prevent default form submission behavior
 
-    try {
-      // Prepare the booking data
-      const newBooking = {
-        uid: "some-uid", // Replace with actual UID
-        bookedTimes: selectedValues
-      };
+    const auth = getAuth();
+    const currentUser = auth.currentUser;
 
-      // Update the document with the new booking
-      await updateDoc(dateDocRef, {
-        bookings: arrayUnion(newBooking)
-      });
+    if (currentUser) {
+      try {
+        // Prepare the booking data with the actual user's UID
+        const newBooking = {
+          uid: currentUser.uid, // Use the UID from the authenticated user
+          bookedTimes: selectedValues
+        };
 
-      // Reset the booking state if needed
-      setBooking({
-        uid: "",
-        bookedTimes: []
-      });
+        // Update the document with the new booking
+        await updateDoc(dateDocRef, {
+          bookings: arrayUnion(newBooking)
+        });
 
-      // Possibly redirect or show a success message
-    } catch (error) {
-      console.error("Failed to create booking:", error);
+        // Reset the booking state if needed
+        setBooking({
+          uid: "",
+          bookedTimes: []
+        });
+        alert("Booking successful");
+        // Possibly redirect or show a success message
+      } catch (error) {
+        console.error("Failed to create booking:", error);
+      }
+    } else {
+      console.error("No user is currently logged in.");
+      // Handle the case where there is no authenticated user
     }
   };
+
 
   return (
     <IonPage>
