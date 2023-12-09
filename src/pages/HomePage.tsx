@@ -24,6 +24,7 @@ import { updateDoc, arrayUnion, doc } from "firebase/firestore";
 import { db, user } from "../firebase-config";
 import { formatISO, startOfToday, addDays, format, parseISO } from "date-fns";
 import { getAuth } from "firebase/auth";
+import { push } from "ionicons/icons";
 
 interface Booking {
   uid: string;
@@ -58,6 +59,8 @@ function HomePage() {
   useEffect(() => {
     localStorage.setItem("selectedDate", dateToBeFetched);
   }, [dateToBeFetched]);
+
+  const history = useHistory();
 
   //   const datesCollectionRef = collection(db, "building-1" , dateToBeFetched)
   const dateDocRef = doc(db, "building-1", dateToBeFetched);
@@ -99,7 +102,7 @@ function HomePage() {
       try {
         // Prepare the booking data with the actual user's UID
         const newBooking = {
-          uid: currentUser.uid, // Use the UID from the authenticated user
+          uid: currentUser.uid,
           bookedTimes: selectedValues,
         };
 
@@ -108,21 +111,28 @@ function HomePage() {
           bookings: arrayUnion(newBooking),
         });
 
-        // Reset the booking state if needed
+        // Reset the booking state and selected values
         setBooking({
           uid: "",
           bookedTimes: [],
         });
-        alert("Booking successful");
-        // Possibly redirect or show a success message
+        setSelectedValues([]); // Reset selected values
+        setSelectedDate(formatISO(startOfToday())); // Reset the date
+
+        // Show a success message or redirect
+        history.push('/booked'); // Redirect to a success page if needed
+
       } catch (error) {
+        history.push('/error');
         console.error("Failed to create booking:", error);
+        // Handle error state here
       }
     } else {
       console.error("No user is currently logged in.");
       // Handle the case where there is no authenticated user
     }
   };
+
 
   return (
     <IonPage>
