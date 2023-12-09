@@ -6,7 +6,14 @@ import {
   IonMenuButton,
   IonTitle,
   IonContent,
-  IonButton, IonDatetime, IonItem, IonLabel, IonModal, IonGrid, IonRow, IonCol
+  IonButton,
+  IonDatetime,
+  IonItem,
+  IonLabel,
+  IonModal,
+  IonGrid,
+  IonRow,
+  IonCol,
 } from "@ionic/react";
 import { useHistory } from "react-router";
 import "./HomePage.css";
@@ -15,7 +22,7 @@ import TimeButton from "../components/TimeButton";
 import { useState, useEffect } from "react";
 import { updateDoc, arrayUnion, doc } from "firebase/firestore";
 import { db, user } from "../firebase-config";
-import { formatISO, startOfToday, addDays } from 'date-fns';
+import { formatISO, startOfToday, addDays, format, parseISO } from "date-fns";
 import { getAuth } from "firebase/auth";
 
 interface Booking {
@@ -27,7 +34,7 @@ function HomePage() {
   const [selectedValues, setSelectedValues] = useState<number[]>([]);
   const [Booking, setBooking] = useState<Booking>({
     uid: "",
-    bookedTimes: []
+    bookedTimes: [],
   });
 
   const [selectedDate, setSelectedDate] = useState<string>(formatISO(startOfToday()));
@@ -38,37 +45,49 @@ function HomePage() {
 
   const handleDateChange = (e: CustomEvent) => {
     setSelectedDate(e.detail.value as string);
-    setShowPicker(false);  // Automatically close the picker when a date is selected
+    setShowPicker(false); // Automatically close the picker when a date is selected
+  };
+
+  const formatDateForDisplay = (dateIsoString: string): string => {
+    const date = parseISO(dateIsoString);
+    return format(date, "dd.MM.yyyy");
   };
 
   const dateToBeFetched = selectedDate.split("T")[0];
 
   useEffect(() => {
-    localStorage.setItem('selectedDate', dateToBeFetched);
+    localStorage.setItem("selectedDate", dateToBeFetched);
   }, [dateToBeFetched]);
 
   //   const datesCollectionRef = collection(db, "building-1" , dateToBeFetched)
   const dateDocRef = doc(db, "building-1", dateToBeFetched);
 
   const handleButtonClick = (value: number) => {
-    setSelectedValues(prev => {
-      // Toggle selection
-      if (prev.includes(value)) {
-        return prev.filter(val => val !== value); // Deselect if already selected
+    setSelectedValues((prev) => {
+      // Check if the value is already selected
+      const isAlreadySelected = prev.includes(value);
+
+      if (isAlreadySelected) {
+        // If already selected, deselect it by filtering it out
+        return prev.filter((val) => val !== value);
       } else {
-        return [...prev, value]; // Add to selected values
+        if (prev.length < 5) {
+          // If less than 5 are selected, add the new value
+          return [...prev, value];
+        } else {
+          // If 5 are already selected, do not add a new value
+          // Optionally, show an alert or some other form of user feedback
+          alert("You can select up to 5 time slots only.");
+          return prev; // Return the previous state
+        }
       }
     });
   };
-
-
   // Since setSelectedValues is asynchronous, to see the current state after a click,
   // you can use the useEffect hook with selectedValues as a dependency.
   useEffect(() => {
     console.log(selectedValues);
   }, [selectedValues]);
-
-  const history = useHistory();
 
   const handleBooking = async (event: React.FormEvent) => {
     event.preventDefault(); // Prevent default form submission behavior
@@ -81,33 +100,29 @@ function HomePage() {
         // Prepare the booking data with the actual user's UID
         const newBooking = {
           uid: currentUser.uid, // Use the UID from the authenticated user
-          bookedTimes: selectedValues
+          bookedTimes: selectedValues,
         };
 
         // Update the document with the new booking
         await updateDoc(dateDocRef, {
-          bookings: arrayUnion(newBooking)
+          bookings: arrayUnion(newBooking),
         });
 
         // Reset the booking state if needed
         setBooking({
           uid: "",
-          bookedTimes: []
+          bookedTimes: [],
         });
-        history.push('./booked')
+        alert("Booking successful");
         // Possibly redirect or show a success message
       } catch (error) {
-        history.push('/error')
         console.error("Failed to create booking:", error);
       }
     } else {
-
       console.error("No user is currently logged in.");
       // Handle the case where there is no authenticated user
     }
-
   };
-
 
   return (
     <IonPage>
@@ -119,13 +134,26 @@ function HomePage() {
           <IonTitle>Hello</IonTitle>
         </IonToolbar>
       </IonHeader>
-      <IonContent fullscreen className="ion-padding">
-        <form onSubmit={handleBooking}>
+      <IonContent
+        fullscreen
+        className="ion-padding"
+      >
+        <form
+          className="scroll-padding" // to avoid overlapping button
+          onSubmit={handleBooking}
+        >
           <IonGrid>
-            <IonRow><p>Please pick a date:</p></IonRow>
             <IonRow>
-              <IonButton onClick={() => setShowPicker(true)}>{selectedDate}</IonButton>
-              <IonModal isOpen={showPicker} onDidDismiss={() => setShowPicker(false)}>
+              <p>Please pick a date:</p>
+            </IonRow>
+            <IonRow>
+              <IonButton onClick={() => setShowPicker(true)}>
+                {selectedDate ? formatDateForDisplay(selectedDate) : "Select Date"}
+              </IonButton>
+              <IonModal
+                isOpen={showPicker}
+                onDidDismiss={() => setShowPicker(false)}
+              >
                 <IonItem>
                   <IonLabel>Pick a Day</IonLabel>
                   <IonDatetime
@@ -139,7 +167,6 @@ function HomePage() {
                 {/* <IonButton onClick={() => setShowPicker(false)}>Done</IonButton> */}
               </IonModal>
             </IonRow>
-
           </IonGrid>
           <IonGrid>
             <IonRow>
@@ -343,16 +370,19 @@ function HomePage() {
                   />
                 </IonRow>
               </IonCol>
-
             </IonRow>
           </IonGrid>
-          <IonButton
-            expand="block"
-            // slot="end"
-            type="submit"
-          >
-            Save and Create
-          </IonButton>
+          <div className="button-container">
+            {/* div to fix button to bottom and create bg */}
+            <IonButton
+              // className="bottom-button"
+              expand="block"
+              slot="fixed"
+              type="submit"
+            >
+              Save and Create
+            </IonButton>
+          </div>
         </form>
       </IonContent>
     </IonPage>
