@@ -22,7 +22,7 @@ import TimeButton from "../components/TimeButton";
 import { useState, useEffect } from "react";
 import { updateDoc, arrayUnion, doc } from "firebase/firestore";
 import { db, user } from "../firebase-config";
-import { formatISO, startOfToday, addDays } from "date-fns";
+import { formatISO, startOfToday, addDays, format, parseISO } from "date-fns";
 import { getAuth } from "firebase/auth";
 
 interface Booking {
@@ -48,6 +48,11 @@ function HomePage() {
 		setShowPicker(false); // Automatically close the picker when a date is selected
 	};
 
+	const formatDateForDisplay = (dateIsoString: string): string => {
+		const date = parseISO(dateIsoString);
+		return format(date, "dd.MM.yyyy");
+	};
+
 	const dateToBeFetched = selectedDate.split("T")[0];
 
 	useEffect(() => {
@@ -59,15 +64,25 @@ function HomePage() {
 
 	const handleButtonClick = (value: number) => {
 		setSelectedValues((prev) => {
-			// Toggle selection
-			if (prev.includes(value)) {
-				return prev.filter((val) => val !== value); // Deselect if already selected
+			// Check if the value is already selected
+			const isAlreadySelected = prev.includes(value);
+
+			if (isAlreadySelected) {
+				// If already selected, deselect it by filtering it out
+				return prev.filter((val) => val !== value);
 			} else {
-				return [...prev, value]; // Add to selected values
+				if (prev.length < 5) {
+					// If less than 5 are selected, add the new value
+					return [...prev, value];
+				} else {
+					// If 5 are already selected, do not add a new value
+					// Optionally, show an alert or some other form of user feedback
+					alert("You can select up to 5 time slots only.");
+					return prev; // Return the previous state
+				}
 			}
 		});
 	};
-
 	// Since setSelectedValues is asynchronous, to see the current state after a click,
 	// you can use the useEffect hook with selectedValues as a dependency.
 	useEffect(() => {
@@ -132,7 +147,9 @@ function HomePage() {
 							<p>Please pick a date:</p>
 						</IonRow>
 						<IonRow>
-							<IonButton onClick={() => setShowPicker(true)}>{selectedDate}</IonButton>
+							<IonButton onClick={() => setShowPicker(true)}>
+								{selectedDate ? formatDateForDisplay(selectedDate) : "Select Date"}
+							</IonButton>
 							<IonModal
 								isOpen={showPicker}
 								onDidDismiss={() => setShowPicker(false)}
