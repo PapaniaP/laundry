@@ -31,7 +31,7 @@ interface AppPage {
 
 const appPages: AppPage[] = [
 	{
-		title: "Home",
+		title: "Laundry booking",
 		url: "/home",
 		iosIcon: homeOutline,
 		mdIcon: homeSharp,

@@ -1,7 +1,7 @@
 import { IonButton, IonContent, IonFooter, IonHeader, IonIcon, IonPage, IonTitle, IonToolbar } from "@ionic/react";
 import "./ErrorPage.css";
-import { alertCircle, checkmarkCircle } from "ionicons/icons";
-// Samuel - This is just simple display of ionic components adjsuted by styling
+import { checkmarkCircle } from "ionicons/icons";
+
 const BookingSuccessful: React.FC = () => {
 
     return (

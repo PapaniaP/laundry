@@ -32,6 +32,7 @@ import HomePage from "./pages/HomePage";
 import SignInPage from "./pages/SignInPage";
 import ErrorPage from "./pages/ErrorPage";
 import BookingSuccessful from "./pages/BookingSuccessful";
+import YourBookingsPage from "./pages/YourBookingsPage";
 
 setupIonicReact();
 
@@ -65,6 +66,12 @@ const App: React.FC = () => {
 							exact={true}
 						>
 							<BookingSuccessful />
+						</Route>
+						<Route
+							path="/bookings"
+							exact={true}
+						>
+							<YourBookingsPage />
 						</Route>
 
 					</IonRouterOutlet>

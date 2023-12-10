@@ -177,7 +177,7 @@ function HomePage() {
           <IonButtons slot="start">
             <IonMenuButton />
           </IonButtons>
-          <IonTitle>Hello</IonTitle>
+          <IonTitle>Laundry booking</IonTitle>
         </IonToolbar>
       </IonHeader>
       <IonContent
