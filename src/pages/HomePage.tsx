@@ -66,7 +66,6 @@ function HomePage() {
 		setSelectedValues((prev) => {
 			// Check if the value is already selected
 			const isAlreadySelected = prev.includes(value);
-
 			if (isAlreadySelected) {
 				// If already selected, deselect it by filtering it out
 				return prev.filter((val) => val !== value);
