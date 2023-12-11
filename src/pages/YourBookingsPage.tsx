@@ -1,12 +1,39 @@
-import { IonContent, IonPage, IonHeader, IonToolbar, IonButtons, IonTitle, IonMenuButton, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonItem, IonLabel, IonButton } from "@ionic/react";
+import {
+    IonContent,
+    IonPage,
+    IonHeader,
+    IonToolbar,
+    IonButtons,
+    IonTitle,
+    IonMenuButton,
+    IonCard,
+    IonCardHeader,
+    IonCardTitle,
+    IonCardContent,
+    IonItem,
+    IonLabel,
+    IonButton,
+} from "@ionic/react";
 import { useState, useEffect } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { collection, onSnapshot, doc, updateDoc, arrayRemove, arrayUnion } from "firebase/firestore";
 import { db } from "../firebase-config";
-import { Booking } from "./HomePage";
+
+interface Booking {
+    uid: string;
+    bookedTimes: number[];
+}
 
 interface BookingsByDate {
     [date: string]: Booking[];
+}
+
+interface GroupedBookings {
+    [date: string]: {
+        date: string;
+        time: number;
+        booking: Booking;
+    }[];
 }
 
 const YourBookingsPage: React.FC = () => {
@@ -26,12 +53,11 @@ const YourBookingsPage: React.FC = () => {
                     snapshot.docs.forEach((doc) => {
                         const date = doc.id;
                         const allBookings: Booking[] = doc.data().bookings || [];
-                        // Filter user's bookings and sort the bookedTimes
                         const userBookings = allBookings
                             .filter(booking => booking.uid === user.uid)
                             .map(booking => ({
                                 ...booking,
-                                bookedTimes: booking.bookedTimes.slice().sort((a, b) => a - b)
+                                bookedTimes: booking.bookedTimes.slice().sort((a, b) => a - b),
                             }));
 
                         if (userBookings.length > 0) {
@@ -39,7 +65,6 @@ const YourBookingsPage: React.FC = () => {
                         }
                     });
 
-                    console.log("Sorted bookings by date:", newBookingsByDate); // Debug: Log sorted bookings
                     setBookingsByDate(newBookingsByDate);
                     setLoading(false); // End loading
                 }, (error) => {
@@ -55,6 +80,27 @@ const YourBookingsPage: React.FC = () => {
 
         return () => unsubscribeAuth();
     }, [auth]);
+
+    // Flatten bookings into an array of { date, time, booking } objects
+    // and sort them by time across all dates
+    const sortedBookings = Object.entries(bookingsByDate).flatMap(([date, bookings]) => {
+        return bookings.flatMap(booking => {
+            return booking.bookedTimes.map(time => ({
+                date,
+                time,
+                booking
+            }));
+        });
+    }).sort((a, b) => a.time - b.time);
+
+    // Group the sorted bookings by date
+    const bookingsGroupedByDate = sortedBookings.reduce<GroupedBookings>((groupedBookings, item) => {
+        if (!groupedBookings[item.date]) {
+            groupedBookings[item.date] = [];
+        }
+        groupedBookings[item.date].push(item);
+        return groupedBookings;
+    }, {});
 
     const deleteBooking = async (date: string, bookingTime: number) => {
         const bookingDocRef = doc(db, "building-1", date);
@@ -121,27 +167,25 @@ const YourBookingsPage: React.FC = () => {
                 </IonToolbar>
             </IonHeader>
             <IonContent fullscreen>
-                {Object.entries(bookingsByDate).length > 0 ? (
-                    Object.entries(bookingsByDate).map(([date, bookings], index) => (
-                        <IonCard key={index}>
+                {Object.keys(bookingsGroupedByDate).length > 0 ? (
+                    Object.entries(bookingsGroupedByDate).map(([date, bookings]) => (
+                        <IonCard key={date}>
                             <IonCardHeader>
                                 <IonCardTitle>{date}</IonCardTitle>
                             </IonCardHeader>
                             <IonCardContent>
-                                {bookings.map((booking, bookingIndex) => (
-                                    booking.bookedTimes.map((time, timeIndex) => (
-                                        <IonItem key={`${bookingIndex}-${timeIndex}`}>
-                                            <IonLabel>
-                                                Booking Time: {time}
-                                            </IonLabel>
-                                            <IonButton
-                                                onClick={() => deleteBooking(date, time)}
-                                                color="danger"
-                                            >
-                                                Delete
-                                            </IonButton>
-                                        </IonItem>
-                                    ))
+                                {bookings.map((booking, index) => (
+                                    <IonItem key={index}>
+                                        <IonLabel>
+                                            Booking Time: {booking.time}
+                                        </IonLabel>
+                                        <IonButton
+                                            onClick={() => deleteBooking(date, booking.time)}
+                                            color="danger"
+                                        >
+                                            Delete
+                                        </IonButton>
+                                    </IonItem>
                                 ))}
                             </IonCardContent>
                         </IonCard>
