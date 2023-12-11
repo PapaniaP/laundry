@@ -26,7 +26,7 @@ import { formatISO, startOfToday, addDays, format, parseISO } from "date-fns";
 import { getAuth } from "firebase/auth";
 import { push } from "ionicons/icons";
 
-interface Booking {
+export interface Booking {
   uid: string;
   bookedTimes: number[];
 }
