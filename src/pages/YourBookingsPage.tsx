@@ -41,6 +41,32 @@ const YourBookingsPage: React.FC = () => {
     const [loading, setLoading] = useState(true); // Loading state
     const auth = getAuth();
 
+    const timeIntervals = [
+        '07:00 - 09:00', '09:00 - 11:00', '11:00 - 13:00', '13:00 - 15:00',
+        '15:00 - 17:00', '17:00 - 19:00', '19:00 - 21:00', '21:00 - 23:00',
+        '07:00 - 09:00', '09:00 - 11:00', '11:00 - 13:00', '13:00 - 15:00',
+        '15:00 - 17:00', '17:00 - 19:00', '19:00 - 21:00', '21:00 - 23:00',
+        '07:00 - 09:00', '09:00 - 11:00', '11:00 - 13:00', '13:00 - 15:00',
+        '15:00 - 17:00', '17:00 - 19:00', '19:00 - 21:00', '21:00 - 23:00'
+    ];
+
+    const formatDate = (dateStr: string) => {
+        const [year, month, day] = dateStr.split("-");
+        return `${day}.${month}.${year}`;
+    };
+
+    const getWasherGroup = (time: number) => {
+        if (time >= 1 && time <= 7) return 'Washer 1';
+        if (time >= 8 && time <= 14) return 'Washer 2';
+        if (time >= 15 && time <= 21) return 'Washer 3';
+        return 'Other';
+    };
+
+    const convertDateToComparableFormat = (dateStr: string) => {
+        const parts = dateStr.split(".");
+        return `${parts[2]}-${parts[1]}-${parts[0]}`; // Converts DD.MM.YYYY to YYYY-MM-DD
+    };
+
     useEffect(() => {
         const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
             if (user) {
@@ -167,29 +193,44 @@ const YourBookingsPage: React.FC = () => {
                 </IonToolbar>
             </IonHeader>
             <IonContent fullscreen>
-                {Object.keys(bookingsGroupedByDate).length > 0 ? (
-                    Object.entries(bookingsGroupedByDate).map(([date, bookings]) => (
-                        <IonCard key={date}>
-                            <IonCardHeader>
-                                <IonCardTitle>{date}</IonCardTitle>
-                            </IonCardHeader>
-                            <IonCardContent>
-                                {bookings.map((booking, index) => (
-                                    <IonItem key={index}>
-                                        <IonLabel>
-                                            Booking Time: {booking.time}
-                                        </IonLabel>
-                                        <IonButton
-                                            onClick={() => deleteBooking(date, booking.time)}
-                                            color="danger"
-                                        >
-                                            Delete
-                                        </IonButton>
-                                    </IonItem>
-                                ))}
-                            </IonCardContent>
-                        </IonCard>
-                    ))
+                {Object.entries(bookingsGroupedByDate).length > 0 ? (
+                    Object.entries(bookingsGroupedByDate)
+                        .sort((a, b) => {
+                            // Convert date strings to a format that can be compared
+                            const dateA = convertDateToComparableFormat(a[0]);
+                            const dateB = convertDateToComparableFormat(b[0]);
+                            return new Date(dateA).getTime() - new Date(dateB).getTime();
+                        })
+                        .map(([date, bookings]) => (
+                            <IonCard key={date}>
+                                <IonCardHeader>
+                                    <IonCardTitle>{formatDate(date)}</IonCardTitle>
+                                </IonCardHeader>
+                                <IonCardContent>
+                                    {['Washer 1', 'Washer 2', 'Washer 3'].map(group => {
+                                        const groupBookings = bookings.filter(booking => getWasherGroup(booking.time) === group);
+                                        return groupBookings.length > 0 && (
+                                            <div key={group}>
+                                                <h2>{group}</h2>
+                                                {groupBookings.map((booking, index) => (
+                                                    <IonItem key={index}>
+                                                        <IonLabel>
+                                                            {timeIntervals[booking.time - 1]}
+                                                        </IonLabel>
+                                                        <IonButton
+                                                            onClick={() => deleteBooking(date, booking.time)}
+                                                            color="danger"
+                                                        >
+                                                            Delete
+                                                        </IonButton>
+                                                    </IonItem>
+                                                ))}
+                                            </div>
+                                        );
+                                    })}
+                                </IonCardContent>
+                            </IonCard>
+                        ))
                 ) : (
                     <IonItem>No bookings found.</IonItem>
                 )}
