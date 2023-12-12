@@ -89,12 +89,6 @@ function HomePage() {
 	//   const datesCollectionRef = collection(db, "building-1" , dateToBeFetched)
 	const dateDocRef = doc(db, "building-1", dateToBeFetched);
 
-	// function which runs after you press a time slot button with time span of 2 hours
-
-	useEffect(() => {
-		console.log(selectedValues);
-	}, [selectedValues]);
-
 	//  sending data to firebase
 
 	const handleBooking = async (event: React.FormEvent) => {
