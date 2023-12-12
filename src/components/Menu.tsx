@@ -1,5 +1,7 @@
 import {
+	IonButton,
 	IonContent,
+	IonFooter,
 	IonIcon,
 	IonItem,
 	IonLabel,
@@ -21,6 +23,8 @@ import {
 	personSharp,
 } from "ionicons/icons";
 import "./Menu.css";
+import { getAuth, signOut } from "firebase/auth";
+import { useAuth } from "./AuthContext";
 
 interface AppPage {
 	url: string;
@@ -52,6 +56,23 @@ const appPages: AppPage[] = [
 
 const Menu: React.FC = () => {
 	const location = useLocation();
+	const auth = getAuth();
+	const { isAuthenticated } = useAuth();
+
+	if (!isAuthenticated) {
+		// If not authenticated, render nothing or null
+		return null;
+	}
+
+	const handleLogout = async () => {
+		try {
+			await signOut(auth);
+			console.log("User signed out");
+			// Redirect to sign-in page or handle the logout view update
+		} catch (error) {
+			console.error("Logout failed:", error);
+		}
+	};
 
 	return (
 		<IonMenu contentId="main">
@@ -83,6 +104,16 @@ const Menu: React.FC = () => {
 						);
 					})}
 				</IonList>
+				<IonFooter className="ion-padding">
+					<IonButton
+						expand="full"
+						onClick={handleLogout}
+						color={"danger"}
+						routerLink="/"
+					>
+						Logout
+					</IonButton>
+				</IonFooter>
 			</IonContent>
 		</IonMenu>
 	);

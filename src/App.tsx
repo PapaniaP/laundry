@@ -8,7 +8,8 @@ import {
 import { IonReactRouter } from "@ionic/react-router";
 import { Redirect, Route } from "react-router-dom";
 import Menu from "./components/Menu";
-import Page from "./pages/Page";
+import { useEffect, useState } from "react";
+import { AuthProvider, useAuth } from "./components/AuthContext";
 
 /* Core CSS required for Ionic components to work properly */
 import "@ionic/react/css/core.css";
@@ -28,6 +29,8 @@ import "@ionic/react/css/display.css";
 
 /* Theme variables */
 import "./theme/variables.css";
+
+/* Routing Linkes */
 import HomePage from "./pages/HomePage";
 import SignInPage from "./pages/SignInPage";
 import ErrorPage from "./pages/ErrorPage";
@@ -39,45 +42,58 @@ setupIonicReact();
 const App: React.FC = () => {
 	return (
 		<IonApp>
-			<IonReactRouter>
-				<IonSplitPane contentId="main">
-					<Menu />
-					<IonRouterOutlet id="main">
-						<Route
-							path="/"
-							exact={true}
-						>
-							<SignInPage />
-						</Route>
-						<Route
-							path="/home"
-							exact={true}
-						>
-							<HomePage />
-						</Route>
-						<Route
-							path="/error"
-							exact={true}
-						>
-							<ErrorPage />
-						</Route>
-						<Route
-							path="/booked"
-							exact={true}
-						>
-							<BookingSuccessful />
-						</Route>
-						<Route
-							path="/bookings"
-							exact={true}
-						>
-							<YourBookingsPage />
-						</Route>
-
-					</IonRouterOutlet>
-				</IonSplitPane>
-			</IonReactRouter>
+			<AuthProvider>
+				<IonReactRouter>
+					<AppContent />
+				</IonReactRouter>
+			</AuthProvider>
 		</IonApp>
+	);
+};
+
+const AppContent: React.FC = () => {
+	const { isAuthenticated } = useAuth();
+
+	console.log("Is Authenticated: ", isAuthenticated); // Log the authentication state
+
+	if (!isAuthenticated) {
+		return <SignInPage />;
+	}
+
+	return (
+		<IonSplitPane contentId="main">
+			<Menu />
+			<IonRouterOutlet id="main">
+				<Route
+					path="/home"
+					exact={true}
+				>
+					<HomePage />
+				</Route>
+				<Route
+					path="/error"
+					exact={true}
+				>
+					<ErrorPage />
+				</Route>
+				<Route
+					path="/booked"
+					exact={true}
+				>
+					<BookingSuccessful />
+				</Route>
+				<Route
+					path="/bookings"
+					exact={true}
+				>
+					<YourBookingsPage />
+				</Route>
+				<Redirect
+					from="/"
+					to="/home"
+				/>
+			</IonRouterOutlet>
+		</IonSplitPane>
 	);
 };
 
