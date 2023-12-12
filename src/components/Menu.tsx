@@ -12,6 +12,7 @@ import {
 	IonMenuToggle,
 	IonNote,
 } from "@ionic/react";
+import { toastController } from "@ionic/core";
 
 import { useLocation } from "react-router-dom";
 import {
@@ -46,12 +47,6 @@ const appPages: AppPage[] = [
 		iosIcon: calendarNumberOutline,
 		mdIcon: calendarNumberSharp,
 	},
-	{
-		title: "Profile",
-		url: "/profile",
-		iosIcon: personOutline,
-		mdIcon: personSharp,
-	},
 ];
 
 const Menu: React.FC = () => {
@@ -68,9 +63,26 @@ const Menu: React.FC = () => {
 		try {
 			await signOut(auth);
 			console.log("User signed out");
-			// Redirect to sign-in page or handle the logout view update
+
+			// Display a toast message
+			const toast = await toastController.create({
+				message: "You have successfully logged out.",
+				duration: 2000, // Duration in milliseconds
+				position: "bottom", // Position of the toast
+				color: "success", // Color of the toast
+			});
+			toast.present();
 		} catch (error) {
 			console.error("Logout failed:", error);
+
+			// Display an error toast
+			const errorToast = await toastController.create({
+				message: "Logout failed. Please try again.",
+				duration: 2000,
+				position: "bottom",
+				color: "danger",
+			});
+			errorToast.present();
 		}
 	};
 
