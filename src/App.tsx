@@ -88,10 +88,6 @@ const AppContent: React.FC = () => {
 				>
 					<YourBookingsPage />
 				</Route>
-				<Redirect
-					from="/"
-					to="/home"
-				/>
 			</IonRouterOutlet>
 		</IonSplitPane>
 	);
