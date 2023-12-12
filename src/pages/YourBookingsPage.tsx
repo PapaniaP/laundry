@@ -13,7 +13,10 @@ import {
 	IonItem,
 	IonLabel,
 	IonButton,
+	IonSpinner,
 } from "@ionic/react";
+import { alertController } from "@ionic/core";
+
 import { useState, useEffect } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import {
@@ -25,6 +28,7 @@ import {
 	arrayUnion,
 } from "firebase/firestore";
 import { db } from "../firebase-config";
+import "./YourBookingsPage.css";
 
 interface Booking {
 	uid: string;
@@ -81,9 +85,9 @@ const YourBookingsPage: React.FC = () => {
 	};
 
 	const getWasherGroup = (time: number) => {
-		if (time >= 1 && time <= 7) return "Washer 1";
-		if (time >= 8 && time <= 14) return "Washer 2";
-		if (time >= 15 && time <= 21) return "Washer 3";
+		if (time >= 1 && time <= 8) return "Washer 1";
+		if (time >= 9 && time <= 16) return "Washer 2";
+		if (time >= 17 && time <= 24) return "Dryer 3";
 		return "Other";
 	};
 
@@ -163,6 +167,35 @@ const YourBookingsPage: React.FC = () => {
 	);
 
 	const deleteBooking = async (date: string, bookingTime: number) => {
+		// Show confirmation dialog
+		const alert = await alertController.create({
+			header: "Confirm Deletion",
+			message: "Do you really want to delete this booking?",
+			buttons: [
+				{
+					text: "Cancel",
+					role: "cancel",
+					handler: () => {
+						console.log("Deletion cancelled");
+					},
+				},
+				{
+					text: "Delete",
+					handler: async () => {
+						// Proceed with the deletion logic
+						await performDeletion(date, bookingTime);
+
+						// Refresh the page after deletion
+						window.location.reload();
+					},
+				},
+			],
+		});
+
+		await alert.present();
+	};
+
+	const performDeletion = async (date: string, bookingTime: number) => {
 		const bookingDocRef = doc(db, "building-1", date);
 		const currentBooking = bookingsByDate[date].find((booking) =>
 			booking.bookedTimes.includes(bookingTime)
@@ -223,7 +256,16 @@ const YourBookingsPage: React.FC = () => {
 	if (loading) {
 		return (
 			<IonPage>
-				<IonContent>Loading your bookings...</IonContent>
+				<IonContent className="ion-padding ion-text-center">
+					<div className="wrapper">
+						<div className="container">
+							<IonSpinner></IonSpinner>
+							<IonTitle className="ion-text-center titleheight">
+								Your Bookings Are Loading
+							</IonTitle>
+						</div>
+					</div>
+				</IonContent>
 			</IonPage>
 		);
 	}
@@ -253,7 +295,7 @@ const YourBookingsPage: React.FC = () => {
 									<IonCardTitle>{formatDate(date)}</IonCardTitle>
 								</IonCardHeader>
 								<IonCardContent>
-									{["Washer 1", "Washer 2", "Washer 3"].map((group) => {
+									{["Washer 1", "Washer 2", "Dryer 3"].map((group) => {
 										const groupBookings = bookings.filter(
 											(booking) => getWasherGroup(booking.time) === group
 										);
@@ -280,7 +322,13 @@ const YourBookingsPage: React.FC = () => {
 							</IonCard>
 						))
 				) : (
-					<IonItem>No bookings found.</IonItem>
+					<div className="wrapper">
+						<div className="container">
+							<IonTitle className="ion-text-center titleheight">
+								You don't have any bookings yet.
+							</IonTitle>
+						</div>
+					</div>
 				)}
 			</IonContent>
 		</IonPage>

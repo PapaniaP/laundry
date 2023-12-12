@@ -57,7 +57,7 @@ const Menu: React.FC = () => {
 		<IonMenu contentId="main">
 			<IonContent>
 				<IonList id="nav-list">
-					<IonListHeader className="ion-padding-bottom">Hi, 'name' </IonListHeader>
+					<IonListHeader className="ion-padding-bottom">Hi &nbsp; 👋</IonListHeader>
 					{appPages.map((appPage, index) => {
 						return (
 							<IonMenuToggle

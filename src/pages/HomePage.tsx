@@ -15,6 +15,8 @@ import {
 	IonRow,
 	IonCol,
 } from "@ionic/react";
+import { toastController } from "@ionic/core";
+
 import { useHistory } from "react-router";
 import "./HomePage.css";
 
@@ -94,6 +96,15 @@ function HomePage() {
 	const handleBooking = async (event: React.FormEvent) => {
 		event.preventDefault(); // Prevent default form submission behavior
 
+		if (selectedValues.length === 0) {
+			const toast = await toastController.create({
+				message: "Please select at least one time slot before saving.",
+				duration: 2000,
+				position: "middle",
+			});
+			await toast.present();
+			return; // Exit the function early
+		}
 		const auth = getAuth();
 		const currentUser = auth.currentUser;
 
@@ -302,6 +313,18 @@ function HomePage() {
 										}
 									/>
 								</IonRow>
+								<IonRow>
+									<TimeButton
+										id={8}
+										text="21:00 - 23:00"
+										value={8}
+										onButtonClick={handleButtonClick}
+										isSelected={selectedValues.includes(8)}
+										isAvailable={
+											!bookings.some((booking) => booking.bookedTimes.includes(8))
+										}
+									/>
+								</IonRow>
 							</IonCol>
 
 							<IonCol>
@@ -311,20 +334,8 @@ function HomePage() {
 								</IonRow>
 								<IonRow>
 									<TimeButton
-										id={8}
-										text="07:00 - 09:00"
-										value={8}
-										onButtonClick={handleButtonClick}
-										isSelected={selectedValues.includes(8)}
-										isAvailable={
-											!bookings.some((booking) => booking.bookedTimes.includes(8))
-										}
-									/>
-								</IonRow>
-								<IonRow>
-									<TimeButton
 										id={9}
-										text="09:00 - 11:00"
+										text="07:00 - 09:00"
 										value={9}
 										onButtonClick={handleButtonClick}
 										isSelected={selectedValues.includes(9)}
@@ -336,7 +347,7 @@ function HomePage() {
 								<IonRow>
 									<TimeButton
 										id={10}
-										text="11:00 - 13:00"
+										text="09:00 - 11:00"
 										value={10}
 										onButtonClick={handleButtonClick}
 										isSelected={selectedValues.includes(10)}
@@ -348,7 +359,7 @@ function HomePage() {
 								<IonRow>
 									<TimeButton
 										id={11}
-										text="13:00 - 15:00"
+										text="11:00 - 13:00"
 										value={11}
 										onButtonClick={handleButtonClick}
 										isSelected={selectedValues.includes(11)}
@@ -360,7 +371,7 @@ function HomePage() {
 								<IonRow>
 									<TimeButton
 										id={12}
-										text="15:00 - 17:00"
+										text="13:00 - 15:00"
 										value={12}
 										onButtonClick={handleButtonClick}
 										isSelected={selectedValues.includes(12)}
@@ -372,7 +383,7 @@ function HomePage() {
 								<IonRow>
 									<TimeButton
 										id={13}
-										text="17:00 - 19:00"
+										text="15:00 - 17:00"
 										value={13}
 										onButtonClick={handleButtonClick}
 										isSelected={selectedValues.includes(13)}
@@ -384,12 +395,36 @@ function HomePage() {
 								<IonRow>
 									<TimeButton
 										id={14}
-										text="19:00 - 21:00"
+										text="17:00 - 19:00"
 										value={14}
 										onButtonClick={handleButtonClick}
 										isSelected={selectedValues.includes(14)}
 										isAvailable={
 											!bookings.some((booking) => booking.bookedTimes.includes(14))
+										}
+									/>
+								</IonRow>
+								<IonRow>
+									<TimeButton
+										id={15}
+										text="19:00 - 21:00"
+										value={15}
+										onButtonClick={handleButtonClick}
+										isSelected={selectedValues.includes(15)}
+										isAvailable={
+											!bookings.some((booking) => booking.bookedTimes.includes(15))
+										}
+									/>
+								</IonRow>
+								<IonRow>
+									<TimeButton
+										id={16}
+										text="21:00 - 23:00"
+										value={16}
+										onButtonClick={handleButtonClick}
+										isSelected={selectedValues.includes(16)}
+										isAvailable={
+											!bookings.some((booking) => booking.bookedTimes.includes(16))
 										}
 									/>
 								</IonRow>
@@ -402,32 +437,8 @@ function HomePage() {
 								</IonRow>
 								<IonRow>
 									<TimeButton
-										id={15}
-										text="07:00 - 09:00"
-										value={15}
-										onButtonClick={handleButtonClick}
-										isSelected={selectedValues.includes(15)}
-										isAvailable={
-											!bookings.some((booking) => booking.bookedTimes.includes(15))
-										}
-									/>
-								</IonRow>
-								<IonRow>
-									<TimeButton
-										id={16}
-										text="09:00 - 11:00"
-										value={16}
-										onButtonClick={handleButtonClick}
-										isSelected={selectedValues.includes(16)}
-										isAvailable={
-											!bookings.some((booking) => booking.bookedTimes.includes(16))
-										}
-									/>
-								</IonRow>
-								<IonRow>
-									<TimeButton
 										id={17}
-										text="11:00 - 13:00"
+										text="07:00 - 09:00"
 										value={17}
 										onButtonClick={handleButtonClick}
 										isSelected={selectedValues.includes(17)}
@@ -439,7 +450,7 @@ function HomePage() {
 								<IonRow>
 									<TimeButton
 										id={18}
-										text="13:00 - 15:00"
+										text="09:00 - 11:00"
 										value={18}
 										onButtonClick={handleButtonClick}
 										isSelected={selectedValues.includes(18)}
@@ -451,7 +462,7 @@ function HomePage() {
 								<IonRow>
 									<TimeButton
 										id={19}
-										text="15:00 - 17:00"
+										text="11:00 - 13:00"
 										value={19}
 										onButtonClick={handleButtonClick}
 										isSelected={selectedValues.includes(19)}
@@ -463,7 +474,7 @@ function HomePage() {
 								<IonRow>
 									<TimeButton
 										id={20}
-										text="17:00 - 19:00"
+										text="13:00 - 15:00"
 										value={20}
 										onButtonClick={handleButtonClick}
 										isSelected={selectedValues.includes(20)}
@@ -475,12 +486,48 @@ function HomePage() {
 								<IonRow>
 									<TimeButton
 										id={21}
-										text="19:00 - 21:00"
+										text="15:00 - 17:00"
 										value={21}
 										onButtonClick={handleButtonClick}
 										isSelected={selectedValues.includes(21)}
 										isAvailable={
 											!bookings.some((booking) => booking.bookedTimes.includes(21))
+										}
+									/>
+								</IonRow>
+								<IonRow>
+									<TimeButton
+										id={22}
+										text="17:00 - 19:00"
+										value={22}
+										onButtonClick={handleButtonClick}
+										isSelected={selectedValues.includes(22)}
+										isAvailable={
+											!bookings.some((booking) => booking.bookedTimes.includes(22))
+										}
+									/>
+								</IonRow>
+								<IonRow>
+									<TimeButton
+										id={23}
+										text="19:00 - 21:00"
+										value={23}
+										onButtonClick={handleButtonClick}
+										isSelected={selectedValues.includes(23)}
+										isAvailable={
+											!bookings.some((booking) => booking.bookedTimes.includes(23))
+										}
+									/>
+								</IonRow>
+								<IonRow>
+									<TimeButton
+										id={24}
+										text="21:00 - 23:00"
+										value={24}
+										onButtonClick={handleButtonClick}
+										isSelected={selectedValues.includes(24)}
+										isAvailable={
+											!bookings.some((booking) => booking.bookedTimes.includes(24))
 										}
 									/>
 								</IonRow>
