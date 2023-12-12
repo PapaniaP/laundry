@@ -91,27 +91,6 @@ function HomePage() {
 
 	// function which runs after you press a time slot button with time span of 2 hours
 
-	const handleButtonClick = (value: number) => {
-		setSelectedValues((prev) => {
-			// Check if the value is already selected
-			const isAlreadySelected = prev.includes(value);
-
-			if (isAlreadySelected) {
-				// If already selected, deselect it by filtering it out
-				return prev.filter((val) => val !== value);
-			} else {
-				if (prev.length < 5) {
-					// If less than 5 are selected, add the new value
-					return [...prev, value];
-				} else {
-					// If 5 are already selected, do not add a new value
-					// Optionally, show an alert or some other form of user feedback
-					alert("You can select up to 5 time slots only.");
-					return prev; // Return the previous state
-				}
-			}
-		});
-	};
 	useEffect(() => {
 		console.log(selectedValues);
 	}, [selectedValues]);
