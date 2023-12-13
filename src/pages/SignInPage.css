@@ -1,13 +1,39 @@
+@import url("https://fonts.googleapis.com/css2?family=Work+Sans:wght@700&display=swap");
 .centered-container {
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
-	height: 100vh;
-	padding: 16px;
+	min-height: 50dvh;
+	padding: 0 16px 16px 16px;
 }
 
 .centered-container > * {
 	width: 100%;
 	max-width: 400px;
+}
+
+.app-header {
+	width: 80%;
+	text-align: center;
+	margin: 2rem auto;
+	padding: 4px 8px;
+	border-radius: 10px;
+	animation: fadeIn 2s ease-in-out;
+}
+
+.app-header h1 {
+	color: var(--ion-color-primary-contrast);
+	font-family: "Work Sans", sans-serif;
+	font-size: 2em;
+	margin: 8px;
+}
+
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
 }

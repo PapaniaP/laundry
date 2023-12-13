@@ -200,7 +200,10 @@ function HomePage() {
 							<p>Please pick a date:</p>
 						</IonRow>
 						<IonRow>
-							<IonButton onClick={() => setShowPicker(true)}>
+							<IonButton
+								className="bottom-button"
+								onClick={() => setShowPicker(true)}
+							>
 								{selectedDate ? formatDateForDisplay(selectedDate) : "Select Date"}
 							</IonButton>
 							<IonModal
@@ -537,7 +540,7 @@ function HomePage() {
 					<div className="button-container">
 						{/* div to fix button to bottom and create bg */}
 						<IonButton
-							// className="bottom-button"
+							className="bottom-button"
 							expand="block"
 							slot="fixed"
 							type="submit"

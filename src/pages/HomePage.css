@@ -3,11 +3,7 @@
 }
 
 .bottom-button {
-	position: fixed;
-	left: 0;
-	bottom: 0;
-	right: 0;
-	margin: 24px;
+	--color: white;
 }
 
 .button-container {
@@ -15,7 +11,7 @@
 	left: 0;
 	bottom: 0;
 	right: 0;
-	padding: 24px;
+	padding: 16px 24px;
 	background-color: var(--ion-toolbar-background);
 	/* backdrop-filter: blur(5px); */
 }
