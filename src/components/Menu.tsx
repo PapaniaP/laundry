@@ -26,6 +26,9 @@ import {
 import "./Menu.css";
 import { getAuth, signOut } from "firebase/auth";
 import { useAuth } from "./AuthContext";
+import { doc, getDoc } from "firebase/firestore";
+import { useEffect, useState } from "react";
+import { db } from "../firebase-config";
 
 interface AppPage {
 	url: string;
@@ -47,50 +50,73 @@ const appPages: AppPage[] = [
 		iosIcon: calendarNumberOutline,
 		mdIcon: calendarNumberSharp,
 	},
+	{
+		title: "Profile",
+		url: "/profile",
+		iosIcon: personOutline,
+		mdIcon: personSharp,
+	},
 ];
 
 const Menu: React.FC = () => {
 	const location = useLocation();
 	const auth = getAuth();
-	const { isAuthenticated } = useAuth();
+	const { user, isAuthenticated } = useAuth();
+	const [firstName, setFirstName] = useState("");
 
 	if (!isAuthenticated) {
 		// If not authenticated, render nothing or null
 		return null;
 	}
 
-	const handleLogout = async () => {
-		try {
-			await signOut(auth);
-			console.log("User signed out");
+	useEffect(() => {
+		if (user) {
+			const userDocRef = doc(db, "users", user.uid);
+			getDoc(userDocRef).then((docSnap) => {
+				if (docSnap.exists()) {
+					const userData = docSnap.data() as { name: string };
 
-			// Display a toast message
-			const toast = await toastController.create({
-				message: "You have successfully logged out.",
-				duration: 2000, // Duration in milliseconds
-				position: "bottom", // Position of the toast
-				color: "success", // Color of the toast
+					const extractedFirstName = userData.name.split(" ")[0];
+					setFirstName(extractedFirstName);
+					console.log("Fetched name:", extractedFirstName); // Debugging
+				}
 			});
-			toast.present();
-		} catch (error) {
-			console.error("Logout failed:", error);
-
-			// Display an error toast
-			const errorToast = await toastController.create({
-				message: "Logout failed. Please try again.",
-				duration: 2000,
-				position: "bottom",
-				color: "danger",
-			});
-			errorToast.present();
 		}
-	};
+	}, [user]);
+	// const handleLogout = async () => {
+	// 	try {
+	// 		await signOut(auth);
+	// 		console.log("User signed out");
+
+	// 		// Display a toast message
+	// 		const toast = await toastController.create({
+	// 			message: "You have successfully logged out.",
+	// 			duration: 2000, // Duration in milliseconds
+	// 			position: "bottom", // Position of the toast
+	// 			color: "success", // Color of the toast
+	// 		});
+	// 		toast.present();
+	// 	} catch (error) {
+	// 		console.error("Logout failed:", error);
+
+	// 		// Display an error toast
+	// 		const errorToast = await toastController.create({
+	// 			message: "Logout failed. Please try again.",
+	// 			duration: 2000,
+	// 			position: "bottom",
+	// 			color: "danger",
+	// 		});
+	// 		errorToast.present();
+	// 	}
+	// };
 
 	return (
 		<IonMenu contentId="main">
 			<IonContent>
 				<IonList id="nav-list">
-					<IonListHeader className="ion-padding-bottom">Hi &nbsp; 👋</IonListHeader>
+					<IonListHeader className="ion-padding-bottom">
+						Hi {firstName} &nbsp; 👋
+					</IonListHeader>
 					{appPages.map((appPage, index) => {
 						return (
 							<IonMenuToggle
@@ -116,16 +142,6 @@ const Menu: React.FC = () => {
 						);
 					})}
 				</IonList>
-				<IonFooter className="ion-padding">
-					<IonButton
-						expand="full"
-						onClick={handleLogout}
-						color={"danger"}
-						routerLink="/"
-					>
-						Logout
-					</IonButton>
-				</IonFooter>
 			</IonContent>
 		</IonMenu>
 	);

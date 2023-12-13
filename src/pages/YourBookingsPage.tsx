@@ -85,9 +85,9 @@ const YourBookingsPage: React.FC = () => {
 	};
 
 	const getWasherGroup = (time: number) => {
-		if (time >= 1 && time <= 8) return "Washer 1";
-		if (time >= 9 && time <= 16) return "Washer 2";
-		if (time >= 17 && time <= 24) return "Dryer 3";
+		if (time >= 1 && time <= 8) return "Washing Machine 1";
+		if (time >= 9 && time <= 16) return "Washing Machine 2";
+		if (time >= 17 && time <= 24) return "Dryer";
 		return "Other";
 	};
 

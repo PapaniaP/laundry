@@ -36,6 +36,8 @@ import SignInPage from "./pages/SignInPage";
 import ErrorPage from "./pages/ErrorPage";
 import BookingSuccessful from "./pages/BookingSuccessful";
 import YourBookingsPage from "./pages/YourBookingsPage";
+import ProfilePage from "./pages/ProfilePage";
+import PasswordChangePage from "./components/PasswordChange";
 
 setupIonicReact();
 
@@ -87,6 +89,18 @@ const AppContent: React.FC = () => {
 					exact={true}
 				>
 					<YourBookingsPage />
+				</Route>
+				<Route
+					path="/profile"
+					exact={true}
+				>
+					<ProfilePage />
+				</Route>
+				<Route
+					path="/change-password"
+					exact={true}
+				>
+					<PasswordChangePage />
 				</Route>
 			</IonRouterOutlet>
 		</IonSplitPane>
