@@ -50,6 +50,7 @@ const ProfilePage: React.FC = () => {
 
 					// Extracting first name for Menu.tsx
 					const firstName = userData.name ? userData.name.split(" ")[0] : "";
+
 				}
 			});
 		}
