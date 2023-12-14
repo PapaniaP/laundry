@@ -14,6 +14,7 @@ import {
 	IonLabel,
 	IonButton,
 	IonSpinner,
+	IonCardSubtitle,
 } from "@ionic/react";
 import { alertController } from "@ionic/core";
 
@@ -26,6 +27,7 @@ import {
 	updateDoc,
 	arrayRemove,
 	arrayUnion,
+	getDoc,
 } from "firebase/firestore";
 import { db } from "../firebase-config";
 import "./YourBookingsPage.css";
@@ -50,6 +52,7 @@ interface GroupedBookings {
 const YourBookingsPage: React.FC = () => {
 	const [bookingsByDate, setBookingsByDate] = useState<BookingsByDate>({});
 	const [loading, setLoading] = useState(true); // Loading state
+	const [userBuilding, setUserBuilding] = useState("");
 	const auth = getAuth();
 
 	const timeIntervals = [
@@ -85,8 +88,8 @@ const YourBookingsPage: React.FC = () => {
 	};
 
 	const getWasherGroup = (time: number) => {
-		if (time >= 1 && time <= 8) return "Washing Machine 1";
-		if (time >= 9 && time <= 16) return "Washing Machine 2";
+		if (time >= 1 && time <= 8) return "Washer 1";
+		if (time >= 9 && time <= 16) return "Washer 2";
 		if (time >= 17 && time <= 24) return "Dryer";
 		return "Other";
 	};
@@ -100,38 +103,59 @@ const YourBookingsPage: React.FC = () => {
 		const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
 			if (user) {
 				setLoading(true); // Begin loading
-				const buildingCollectionRef = collection(db, "building-1");
 
-				const unsubscribe = onSnapshot(
-					buildingCollectionRef,
-					(snapshot) => {
-						const newBookingsByDate: BookingsByDate = {};
+				// Fetch user's building number
+				const userRef = doc(db, "users", user.uid);
+				getDoc(userRef)
+					.then((docSnap) => {
+						if (docSnap.exists()) {
+							const userData = docSnap.data();
+							setUserBuilding(userData.building); // Save the user's building number in state
 
-						snapshot.docs.forEach((doc) => {
-							const date = doc.id;
-							const allBookings: Booking[] = doc.data().bookings || [];
-							const userBookings = allBookings
-								.filter((booking) => booking.uid === user.uid)
-								.map((booking) => ({
-									...booking,
-									bookedTimes: booking.bookedTimes.slice().sort((a, b) => a - b),
-								}));
+							// Fetch bookings for the user in the specific building
+							const buildingCollectionRef = collection(db, userData.building);
 
-							if (userBookings.length > 0) {
-								newBookingsByDate[date] = userBookings;
-							}
-						});
+							const unsubscribe = onSnapshot(
+								buildingCollectionRef,
+								(snapshot) => {
+									const newBookingsByDate: BookingsByDate = {};
 
-						setBookingsByDate(newBookingsByDate);
-						setLoading(false); // End loading
-					},
-					(error) => {
-						console.error("Error listening to the collection:", error);
-						setLoading(false); // End loading even if there's an error
-					}
-				);
+									snapshot.docs.forEach((doc) => {
+										const date = doc.id;
+										const allBookings: Booking[] = doc.data().bookings || [];
+										const userBookings = allBookings
+											.filter((booking) => booking.uid === user.uid)
+											.map((booking) => ({
+												...booking,
+												bookedTimes: booking.bookedTimes.slice().sort((a, b) => a - b),
+											}));
 
-				return () => unsubscribe();
+										if (userBookings.length > 0) {
+											newBookingsByDate[date] = userBookings;
+										}
+									});
+
+									setBookingsByDate(newBookingsByDate);
+									setLoading(false); // End loading
+								},
+								(error) => {
+									console.error("Error listening to the collection:", error);
+									setLoading(false); // End loading even if there's an error
+								}
+							);
+
+							return () => unsubscribe();
+						} else {
+							// Handle case where user data does not exist
+							console.error("User data not found");
+							setLoading(false);
+						}
+					})
+					.catch((error) => {
+						console.error("Error fetching user data:", error);
+						setLoading(false);
+					});
+				console.log("Bookings by Date:", bookingsByDate);
 			} else {
 				setLoading(false);
 			}
@@ -252,6 +276,7 @@ const YourBookingsPage: React.FC = () => {
 			});
 		}
 	};
+	console.log("Grouped Bookings:", bookingsGroupedByDate);
 
 	if (loading) {
 		return (
@@ -259,7 +284,7 @@ const YourBookingsPage: React.FC = () => {
 				<IonContent className="ion-padding ion-text-center">
 					<div className="wrapper">
 						<div className="container">
-							<IonSpinner></IonSpinner>
+							<IonSpinner />
 							<IonTitle className="ion-text-center titleheight">
 								Your Bookings Are Loading
 							</IonTitle>
@@ -284,7 +309,6 @@ const YourBookingsPage: React.FC = () => {
 				{Object.entries(bookingsGroupedByDate).length > 0 ? (
 					Object.entries(bookingsGroupedByDate)
 						.sort((a, b) => {
-							// Convert date strings to a format that can be compared
 							const dateA = convertDateToComparableFormat(a[0]);
 							const dateB = convertDateToComparableFormat(b[0]);
 							return new Date(dateA).getTime() - new Date(dateB).getTime();
@@ -293,31 +317,23 @@ const YourBookingsPage: React.FC = () => {
 							<IonCard key={date}>
 								<IonCardHeader>
 									<IonCardTitle>{formatDate(date)}</IonCardTitle>
+									<IonCardSubtitle>{userBuilding} </IonCardSubtitle>
 								</IonCardHeader>
 								<IonCardContent>
-									{["Washer 1", "Washer 2", "Dryer 3"].map((group) => {
-										const groupBookings = bookings.filter(
-											(booking) => getWasherGroup(booking.time) === group
-										);
-										return (
-											groupBookings.length > 0 && (
-												<div key={group}>
-													<h2>{group}</h2>
-													{groupBookings.map((booking, index) => (
-														<IonItem key={index}>
-															<IonLabel>{timeIntervals[booking.time - 1]}</IonLabel>
-															<IonButton
-																onClick={() => deleteBooking(date, booking.time)}
-																color="danger"
-															>
-																Delete
-															</IonButton>
-														</IonItem>
-													))}
-												</div>
-											)
-										);
-									})}
+									{bookings.map((booking) => (
+										<div key={booking.time}>
+											<IonItem>
+												<IonLabel>{timeIntervals[booking.time - 1]}</IonLabel>
+												<IonLabel>{getWasherGroup(booking.time)}</IonLabel>
+												<IonButton
+													onClick={() => deleteBooking(date, booking.time)}
+													color="danger"
+												>
+													Delete
+												</IonButton>
+											</IonItem>
+										</div>
+									))}
 								</IonCardContent>
 							</IonCard>
 						))
