@@ -15,6 +15,13 @@ import {
 	IonButton,
 	IonSpinner,
 	IonCardSubtitle,
+	IonList,
+	IonIcon,
+	IonText,
+	IonChip,
+	IonItemOptions,
+	IonItemOption,
+	IonItemSliding,
 } from "@ionic/react";
 import { alertController } from "@ionic/core";
 
@@ -31,6 +38,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase-config";
 import "./YourBookingsPage.css";
+import { trash, trashBin } from "ionicons/icons";
 
 interface Booking {
 	uid: string;
@@ -303,6 +311,12 @@ const YourBookingsPage: React.FC = () => {
 						<IonMenuButton />
 					</IonButtons>
 					<IonTitle>Your bookings</IonTitle>
+					<IonChip
+						className="ion-margin-end"
+						slot="end"
+					>
+						{userBuilding.split("-")[1]}
+					</IonChip>
 				</IonToolbar>
 			</IonHeader>
 			<IonContent fullscreen>
@@ -313,27 +327,60 @@ const YourBookingsPage: React.FC = () => {
 							const dateB = convertDateToComparableFormat(b[0]);
 							return new Date(dateA).getTime() - new Date(dateB).getTime();
 						})
-						.map(([date, bookings]) => (
+						.map(([date, dailyBookings]) => (
 							<IonCard key={date}>
 								<IonCardHeader>
 									<IonCardTitle>{formatDate(date)}</IonCardTitle>
-									<IonCardSubtitle>{userBuilding} </IonCardSubtitle>
 								</IonCardHeader>
 								<IonCardContent>
-									{bookings.map((booking) => (
-										<div key={booking.time}>
-											<IonItem>
-												<IonLabel>{timeIntervals[booking.time - 1]}</IonLabel>
-												<IonLabel>{getWasherGroup(booking.time)}</IonLabel>
-												<IonButton
-													onClick={() => deleteBooking(date, booking.time)}
-													color="danger"
-												>
-													Delete
-												</IonButton>
-											</IonItem>
-										</div>
-									))}
+									{["Washer 1", "Washer 2", "Dryer"].map((washerGroup) => {
+										// Filter and sort bookings for each washer group
+										const washerBookings = dailyBookings
+											.filter((booking) => getWasherGroup(booking.time) === washerGroup)
+											.sort((a, b) => a.time - b.time);
+
+										return (
+											washerBookings.length > 0 && (
+												<IonList>
+													<div key={washerGroup}>
+														<h2>{washerGroup}</h2>
+														{washerBookings.map((booking, index) => (
+															//delete button
+
+															/* <IonItem key={`${date}-${booking.time}-${index}`}>
+																<IonLabel>{timeIntervals[booking.time - 1]}</IonLabel>
+																<IonButton
+																	onClick={() => deleteBooking(date, booking.time)}
+																	color="danger"
+																>
+																	<IonIcon
+																		slot="icon-only"
+																		icon={trashBin}
+																	></IonIcon>
+																</IonButton>
+														</IonItem>*/
+
+															//slide to delete
+															<IonItemSliding>
+																<IonItem key={`${date}-${booking.time}-${index}`}>
+																	<IonLabel>{timeIntervals[booking.time - 1]}</IonLabel>
+																</IonItem>
+
+																<IonItemOptions>
+																	<IonItemOption
+																		color={"danger"}
+																		onClick={() => deleteBooking(date, booking.time)}
+																	>
+																		Delete
+																	</IonItemOption>
+																</IonItemOptions>
+															</IonItemSliding>
+														))}
+													</div>
+												</IonList>
+											)
+										);
+									})}
 								</IonCardContent>
 							</IonCard>
 						))
