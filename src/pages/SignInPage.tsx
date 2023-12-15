@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import "./SignInPage.css";
 import {
 	IonInput,
-	IonText,
 	IonButton,
 	IonCard,
 	IonContent,
@@ -12,7 +11,6 @@ import {
 	IonCardSubtitle,
 	IonAlert,
 	IonList,
-	IonItem,
 } from "@ionic/react";
 import { alertController } from "@ionic/core";
 import { signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
