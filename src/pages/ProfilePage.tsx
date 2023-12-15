@@ -30,12 +30,19 @@ import { useAuth } from "../components/AuthContext";
 import "../theme/variables.css";
 import "./ProfilePage.css";
 
+interface UserData {
+	name?: string;
+	email?: string;
+	building?: string;
+	// Include other user properties as needed
+}
+
 const ProfilePage: React.FC = () => {
 	const { user } = useAuth();
 	const auth = getAuth();
 
 	// State for user data, new password, and theme
-	const [userData, setUserData] = useState<any>({});
+	const [userData, setUserData] = useState<UserData>({});
 	const [newPassword, setNewPassword] = useState("");
 	const [themeToggle, setThemeToggle] = useState(false);
 	const [showAlert, setShowAlert] = useState(false);
@@ -50,7 +57,6 @@ const ProfilePage: React.FC = () => {
 
 					// Extracting first name for Menu.tsx
 					const firstName = userData.name ? userData.name.split(" ")[0] : "";
-
 				}
 			});
 		}
@@ -83,11 +89,18 @@ const ProfilePage: React.FC = () => {
 			return;
 		}
 		const userDocRef = doc(db, "users", user.uid);
-		await updateDoc(userDocRef, {
-			building: newBuilding,
-		});
-		setAlertMessage("Building updated successfully.");
-		setShowAlert(true);
+		try {
+			await updateDoc(userDocRef, {
+				building: newBuilding,
+			});
+			setUserData((prevUserData) => ({ ...prevUserData, building: newBuilding }));
+			setAlertMessage("Building updated successfully.");
+			setShowAlert(true);
+		} catch (error) {
+			console.error("Failed to update building:", error);
+			setAlertMessage("Failed to update building.");
+			setShowAlert(true);
+		}
 	};
 
 	const toggleChange = (ev: CustomEvent) => {
@@ -109,7 +122,7 @@ const ProfilePage: React.FC = () => {
 	};
 
 	useEffect(() => {
-		initializeDarkTheme;
+		initializeDarkTheme();
 	}, []);
 
 	const handleLogout = async () => {
@@ -187,11 +200,12 @@ const ProfilePage: React.FC = () => {
 					<div className="profile-section">
 						<IonList>
 							<IonItem>
-								<IonLabel>Dark Mode</IonLabel>
+								<IonLabel aria-label="Dark Mode label">Dark Mode</IonLabel>
 								<IonToggle
 									checked={themeToggle}
 									onIonChange={toggleChange}
 									slot="end"
+									aria-label="Dark Mode Toggle"
 								/>
 							</IonItem>
 						</IonList>
