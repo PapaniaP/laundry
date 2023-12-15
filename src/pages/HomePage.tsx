@@ -118,9 +118,6 @@ function HomePage() {
 		console.log(selectedValues);
 	}, [selectedValues]);
 
-	//   const datesCollectionRef = collection(db, "building-1" , dateToBeFetched)
-	const dateDocRef = doc(db, "building-1", dateToBeFetched);
-
 	//  sending data to firebase
 
 	const handleBooking = async (event: React.FormEvent) => {
@@ -176,7 +173,7 @@ function HomePage() {
 
 	useEffect(() => {
 		// Construct the path to the document for the selected date
-		const dateDocRef = doc(db, "building-1", dateToBeFetched);
+		const dateDocRef = doc(db, userBuilding, dateToBeFetched);
 
 		// Start listening to the document
 		const unsubscribe = onSnapshot(
