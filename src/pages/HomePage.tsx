@@ -135,7 +135,7 @@ function HomePage() {
 		const auth = getAuth();
 		const currentUser = auth.currentUser;
 
-		if (currentUser) {
+		if (currentUser && userBuilding) {
 			try {
 				const newBooking = {
 					uid: currentUser.uid,
@@ -172,32 +172,35 @@ function HomePage() {
 	// fetching data from database
 
 	useEffect(() => {
-		// Construct the path to the document for the selected date
-		const dateDocRef = doc(db, userBuilding, dateToBeFetched);
+		// Only set up the listener if userBuilding has been set
+		if (userBuilding) {
+			// Construct the path to the document for the selected date
+			const dateDocRef = doc(db, userBuilding, dateToBeFetched);
 
-		// Start listening to the document
-		const unsubscribe = onSnapshot(
-			dateDocRef,
-			(documentSnapshot) => {
-				if (documentSnapshot.exists()) {
-					const data = documentSnapshot.data();
-					// Assuming 'bookings' is the array within your document
-					const fetchedBookings: Booking[] = data.bookings || [];
-					setBookings(fetchedBookings);
-				} else {
-					// Handle the case where the document does not exist
-					setBookings([]);
+			// Start listening to the document
+			const unsubscribe = onSnapshot(
+				dateDocRef,
+				(documentSnapshot) => {
+					if (documentSnapshot.exists()) {
+						const data = documentSnapshot.data();
+						// Assuming 'bookings' is the array within your document
+						const fetchedBookings: Booking[] = data.bookings || [];
+						setBookings(fetchedBookings);
+					} else {
+						// Handle the case where the document does not exist
+						setBookings([]);
+					}
+				},
+				(error) => {
+					// Handle errors, such as lack of permissions to read the data
+					console.error("Error listening to the document:", error);
 				}
-			},
-			(error) => {
-				// Handle errors, such as lack of permissions to read the data
-				console.error("Error listening to the document:", error);
-			}
-		);
+			);
 
-		// Clean up the listener when the component unmounts
-		return () => unsubscribe();
-	}, [dateToBeFetched]); // Re-run the effect if the selected date changes
+			// Clean up the listener when the component unmounts
+			return () => unsubscribe();
+		}
+	}, [dateToBeFetched, userBuilding]); // Add userBuilding as a dependency
 
 	useEffect(() => {
 		console.log(bookings);
