@@ -107,15 +107,17 @@ const ProfilePage: React.FC = () => {
 
 	const initializeDarkTheme = () => {
 		const storedTheme = localStorage.getItem("theme");
-		const isDark = storedTheme
-			? storedTheme === "dark"
-			: window.matchMedia("(prefers-color-scheme: dark)").matches;
-		setThemeToggle(isDark);
-		toggleDarkTheme(isDark);
+		if (storedTheme) {
+			setThemeToggle(storedTheme === "dark");
+		} else {
+			const isSystemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+			setThemeToggle(isSystemDark);
+		}
 	};
 
 	useEffect(() => {
 		initializeDarkTheme();
+		// Note: Only call toggleDarkTheme when user actively changes the theme, not here
 	}, []);
 
 	const handleLogout = async () => {
