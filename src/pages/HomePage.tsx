@@ -14,6 +14,7 @@ import {
 	IonGrid,
 	IonRow,
 	IonCol,
+	IonChip,
 } from "@ionic/react";
 import { toastController } from "@ionic/core";
 
@@ -22,7 +23,14 @@ import "./HomePage.css";
 
 import TimeButton from "../components/TimeButton";
 import { useState, useEffect } from "react";
-import { updateDoc, arrayUnion, doc, onSnapshot, collection } from "firebase/firestore";
+import {
+	updateDoc,
+	arrayUnion,
+	doc,
+	onSnapshot,
+	collection,
+	getDoc,
+} from "firebase/firestore";
 import { db, user } from "../firebase-config";
 import { formatISO, startOfToday, addDays, format, parseISO } from "date-fns";
 import { getAuth } from "firebase/auth";
@@ -34,12 +42,35 @@ export interface Booking {
 }
 
 function HomePage() {
+	const [userBuilding, setUserBuilding] = useState(""); // State to hold user's building number
+	const history = useHistory();
+	const auth = getAuth();
+
 	const [selectedValues, setSelectedValues] = useState<number[]>([]); // this is for updating array
 	const [bookings, setBookings] = useState<Booking[]>([]); // this is for fetching
 	const [Booking, setBooking] = useState<Booking>({
 		uid: "",
 		bookedTimes: [],
 	});
+
+	useEffect(() => {
+		if (auth.currentUser) {
+			// Fetch user's building number
+			const userRef = doc(db, "users", auth.currentUser.uid);
+			getDoc(userRef)
+				.then((docSnap) => {
+					if (docSnap.exists()) {
+						const userData = docSnap.data();
+						setUserBuilding(userData.building); // Set the user's building number
+					} else {
+						console.error("User data not found");
+					}
+				})
+				.catch((error) => {
+					console.error("Error fetching user data:", error);
+				});
+		}
+	}, [auth.currentUser]);
 
 	// date picker
 
@@ -86,7 +117,6 @@ function HomePage() {
 	useEffect(() => {
 		console.log(selectedValues);
 	}, [selectedValues]);
-	const history = useHistory();
 
 	//   const datesCollectionRef = collection(db, "building-1" , dateToBeFetched)
 	const dateDocRef = doc(db, "building-1", dateToBeFetched);
@@ -110,13 +140,13 @@ function HomePage() {
 
 		if (currentUser) {
 			try {
-				// Prepare the booking data with the actual user's UID
 				const newBooking = {
 					uid: currentUser.uid,
 					bookedTimes: selectedValues,
 				};
 
-				// Update the document with the new booking
+				const dateDocRef = doc(db, userBuilding, dateToBeFetched); // Use user's building number
+
 				await updateDoc(dateDocRef, {
 					bookings: arrayUnion(newBooking),
 				});
@@ -185,6 +215,12 @@ function HomePage() {
 						<IonMenuButton />
 					</IonButtons>
 					<IonTitle>Laundry booking</IonTitle>
+					<IonChip
+						className="ion-margin-end"
+						slot="end"
+					>
+						{userBuilding.split("-")[1]}
+					</IonChip>
 				</IonToolbar>
 			</IonHeader>
 			<IonContent
