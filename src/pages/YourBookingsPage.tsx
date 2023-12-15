@@ -347,21 +347,22 @@ const YourBookingsPage: React.FC = () => {
 														{washerBookings.map((booking, index) => (
 															//delete button
 
-															/* <IonItem key={`${date}-${booking.time}-${index}`}>
+															<IonItem key={`${date}-${booking.time}-${index}`}>
 																<IonLabel>{timeIntervals[booking.time - 1]}</IonLabel>
 																<IonButton
 																	onClick={() => deleteBooking(date, booking.time)}
 																	color="danger"
 																>
+																	Delete
 																	<IonIcon
-																		slot="icon-only"
+																		slot="end"
 																		icon={trashBin}
 																	></IonIcon>
 																</IonButton>
-														</IonItem>*/
+															</IonItem>
 
 															//slide to delete
-															<IonItemSliding>
+															/*	<IonItemSliding>
 																<IonItem key={`${date}-${booking.time}-${index}`}>
 																	<IonLabel>{timeIntervals[booking.time - 1]}</IonLabel>
 																</IonItem>
@@ -374,7 +375,7 @@ const YourBookingsPage: React.FC = () => {
 																		Delete
 																	</IonItemOption>
 																</IonItemOptions>
-															</IonItemSliding>
+															</IonItemSliding> */
 														))}
 													</div>
 												</IonList>
