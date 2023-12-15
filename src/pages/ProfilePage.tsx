@@ -4,7 +4,6 @@ import {
 	IonContent,
 	IonLabel,
 	IonButton,
-	IonInput,
 	IonSelect,
 	IonSelectOption,
 	IonAlert,
@@ -15,15 +14,9 @@ import {
 	IonMenuButton,
 	IonTitle,
 	IonToolbar,
-	IonCard,
-	IonCardContent,
-	IonCardHeader,
-	IonCardTitle,
 	IonList,
-	IonGrid,
-	IonRow,
 } from "@ionic/react";
-import { getAuth, updatePassword, signOut } from "firebase/auth";
+import { getAuth, signOut } from "firebase/auth";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase-config";
 import { useAuth } from "../components/AuthContext";
