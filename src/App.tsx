@@ -5,12 +5,14 @@ import {
 	IonRouterOutlet,
 	IonSplitPane,
 	setupIonicReact,
+	IonSpinner
 } from "@ionic/react";
 import { IonReactRouter } from "@ionic/react-router";
 import { Redirect, Route } from "react-router-dom";
 import Menu from "./components/Menu";
 import { useEffect, useState } from "react";
-import { AuthProvider, useAuth } from "./components/AuthContext";
+import { AuthProvider } from "./components/AuthContext";
+import useAuth from './useAuthHook';
 
 /* Core CSS required for Ionic components to work properly */
 import "@ionic/react/css/core.css";
@@ -55,9 +57,18 @@ const App: React.FC = () => {
 };
 
 const AppContent: React.FC = () => {
-	const { isAuthenticated } = useAuth();
+	const { isAuthenticated, isLoading } = useAuth();
 
 	console.log("Is Authenticated: ", isAuthenticated); // Log the authentication state
+
+	// If the authentication state is still being determined, show a loading indicator
+	if (isLoading) {
+		return (
+			<IonApp>
+				<IonSpinner />
+			</IonApp>
+		);
+	}
 
 	if (!isAuthenticated) {
 		return <SignInPage />;
@@ -69,6 +80,12 @@ const AppContent: React.FC = () => {
 			<IonRouterOutlet id="main">
 				<Route
 					path="/home"
+					exact={true}
+				>
+					<HomePage />
+				</Route>
+				<Route
+					path=""
 					exact={true}
 				>
 					<HomePage />

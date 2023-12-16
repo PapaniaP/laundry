@@ -89,6 +89,7 @@ const ProfilePage: React.FC = () => {
 			setUserData((prevUserData) => ({ ...prevUserData, building: newBuilding }));
 			setAlertMessage("Building updated successfully.");
 			setShowAlert(true);
+			window.location.reload();
 		} catch (error) {
 			console.error("Failed to update building:", error);
 			setAlertMessage("Failed to update building.");
