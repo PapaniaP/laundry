@@ -18,20 +18,30 @@ const TimeButton: React.FC<TimeButtonProps> = ({
 	isAvailable,
 	id,
 }) => {
+	let buttonFill: "solid" | "outline" | "clear" | "default";
+	if (isSelected) {
+		buttonFill = "solid"; // or any other color to indicate selection
+	} else if (isAvailable) {
+		buttonFill = "outline";
+	} else {
+		buttonFill = "outline";
+	}
+
 	let buttonColor;
 	if (isSelected) {
-		buttonColor = "tertiary"; // or any other color to indicate selection
+		buttonColor = "primary"; // or any other color to indicate selection
 	} else if (isAvailable) {
-		buttonColor = "success";
+		buttonColor = "primary";
 	} else {
 		buttonColor = "danger";
 	}
 
 	return (
 		<IonButton
-			color={buttonColor}
 			onClick={() => onButtonClick(value)}
 			disabled={!isAvailable} // disable button if not available
+			fill={buttonFill}
+			color={buttonColor}
 		>
 			{text}
 		</IonButton>

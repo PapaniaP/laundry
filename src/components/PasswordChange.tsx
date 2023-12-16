@@ -26,7 +26,6 @@ const PasswordChangePage: React.FC = () => {
 			alert("New passwords do not match.");
 			return;
 		}
-		// Add logic to validate the old password and then update to the new password
 		try {
 			if (user) {
 				await updatePassword(user, newPassword);
@@ -35,7 +34,6 @@ const PasswordChangePage: React.FC = () => {
 			}
 		} catch (error) {
 			console.error("Error updating password: ", error);
-			// Handle errors
 		}
 	};
 
@@ -86,6 +84,7 @@ const PasswordChangePage: React.FC = () => {
 							expand="block"
 							onClick={handleChangePassword}
 							color={"primary"}
+							aria-label="Update Password" // Clear description for screen readers
 						>
 							Update Password
 						</IonButton>
