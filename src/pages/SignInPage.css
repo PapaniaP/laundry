@@ -23,7 +23,7 @@
 }
 
 .app-header h1 {
-	color: var(--ion-color-primary-contrast);
+	color: var(--ion-text-color);
 	font-family: "Work Sans", sans-serif;
 	font-size: 2em;
 	margin: 8px;

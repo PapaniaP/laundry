@@ -4,7 +4,6 @@ import {
 	IonContent,
 	IonLabel,
 	IonButton,
-	IonInput,
 	IonSelect,
 	IonSelectOption,
 	IonAlert,
@@ -15,27 +14,28 @@ import {
 	IonMenuButton,
 	IonTitle,
 	IonToolbar,
-	IonCard,
-	IonCardContent,
-	IonCardHeader,
-	IonCardTitle,
 	IonList,
-	IonGrid,
-	IonRow,
 } from "@ionic/react";
-import { getAuth, updatePassword, signOut } from "firebase/auth";
+import { getAuth, signOut } from "firebase/auth";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase-config";
 import { useAuth } from "../components/AuthContext";
 import "../theme/variables.css";
 import "./ProfilePage.css";
 
+interface UserData {
+	name?: string;
+	email?: string;
+	building?: string;
+	// Include other user properties as needed
+}
+
 const ProfilePage: React.FC = () => {
 	const { user } = useAuth();
 	const auth = getAuth();
 
 	// State for user data, new password, and theme
-	const [userData, setUserData] = useState<any>({});
+	const [userData, setUserData] = useState<UserData>({});
 	const [newPassword, setNewPassword] = useState("");
 	const [themeToggle, setThemeToggle] = useState(false);
 	const [showAlert, setShowAlert] = useState(false);
@@ -50,7 +50,6 @@ const ProfilePage: React.FC = () => {
 
 					// Extracting first name for Menu.tsx
 					const firstName = userData.name ? userData.name.split(" ")[0] : "";
-
 				}
 			});
 		}
@@ -83,11 +82,18 @@ const ProfilePage: React.FC = () => {
 			return;
 		}
 		const userDocRef = doc(db, "users", user.uid);
-		await updateDoc(userDocRef, {
-			building: newBuilding,
-		});
-		setAlertMessage("Building updated successfully.");
-		setShowAlert(true);
+		try {
+			await updateDoc(userDocRef, {
+				building: newBuilding,
+			});
+			setUserData((prevUserData) => ({ ...prevUserData, building: newBuilding }));
+			setAlertMessage("Building updated successfully.");
+			setShowAlert(true);
+		} catch (error) {
+			console.error("Failed to update building:", error);
+			setAlertMessage("Failed to update building.");
+			setShowAlert(true);
+		}
 	};
 
 	const toggleChange = (ev: CustomEvent) => {
@@ -101,15 +107,17 @@ const ProfilePage: React.FC = () => {
 
 	const initializeDarkTheme = () => {
 		const storedTheme = localStorage.getItem("theme");
-		const isDark = storedTheme
-			? storedTheme === "dark"
-			: window.matchMedia("(prefers-color-scheme: dark)").matches;
-		setThemeToggle(isDark);
-		toggleDarkTheme(isDark);
+		if (storedTheme) {
+			setThemeToggle(storedTheme === "dark");
+		} else {
+			const isSystemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+			setThemeToggle(isSystemDark);
+		}
 	};
 
 	useEffect(() => {
-		initializeDarkTheme;
+		initializeDarkTheme();
+		// Note: Only call toggleDarkTheme when user actively changes the theme, not here
 	}, []);
 
 	const handleLogout = async () => {
@@ -187,11 +195,12 @@ const ProfilePage: React.FC = () => {
 					<div className="profile-section">
 						<IonList>
 							<IonItem>
-								<IonLabel>Dark Mode</IonLabel>
+								<IonLabel aria-label="Dark Mode label">Dark Mode</IonLabel>
 								<IonToggle
 									checked={themeToggle}
 									onIonChange={toggleChange}
 									slot="end"
+									aria-label="Dark Mode Toggle"
 								/>
 							</IonItem>
 						</IonList>

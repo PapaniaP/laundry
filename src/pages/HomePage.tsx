@@ -24,18 +24,10 @@ import "./HomePage.css";
 
 import TimeButton from "../components/TimeButton";
 import { useState, useEffect } from "react";
-import {
-	updateDoc,
-	arrayUnion,
-	doc,
-	onSnapshot,
-	collection,
-	getDoc,
-} from "firebase/firestore";
-import { db, user } from "../firebase-config";
+import { updateDoc, arrayUnion, doc, onSnapshot, getDoc } from "firebase/firestore";
+import { db } from "../firebase-config";
 import { formatISO, startOfToday, addDays, format, parseISO } from "date-fns";
 import { getAuth } from "firebase/auth";
-import { push } from "ionicons/icons";
 
 export interface Booking {
 	uid: string;

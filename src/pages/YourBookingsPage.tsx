@@ -23,18 +23,10 @@ import { alertController } from "@ionic/core";
 
 import { useState, useEffect } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import {
-	collection,
-	onSnapshot,
-	doc,
-	updateDoc,
-	arrayRemove,
-	arrayUnion,
-	getDoc,
-} from "firebase/firestore";
+import { collection, onSnapshot, doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "../firebase-config";
 import "./YourBookingsPage.css";
-import { trash, trashBin } from "ionicons/icons";
+import { trashBin } from "ionicons/icons";
 
 interface Booking {
 	uid: string;
@@ -195,7 +187,12 @@ const YourBookingsPage: React.FC = () => {
 	);
 
 	const deleteBooking = async (date: string, bookingTime: number) => {
-		// Show confirmation dialog
+		if (!userBuilding) {
+			console.error("Building information is not available.");
+			// Provide appropriate user feedback here
+			return;
+		}
+
 		const alert = await alertController.create({
 			header: "Confirm Deletion",
 			message: "Do you really want to delete this booking?",
@@ -209,12 +206,8 @@ const YourBookingsPage: React.FC = () => {
 				},
 				{
 					text: "Delete",
-					handler: async () => {
-						// Pass userBuilding to performDeletion
-						await performDeletion(date, bookingTime, userBuilding);
-
-						// // Refresh the page after deletion
-						// window.location.reload();
+					handler: () => {
+						performDeletion(date, bookingTime);
 					},
 				},
 			],
@@ -223,61 +216,72 @@ const YourBookingsPage: React.FC = () => {
 		await alert.present();
 	};
 
-	const performDeletion = async (date: string, bookingTime: number, userBuilding: string) => {
+	const performDeletion = async (date: string, bookingTime: number) => {
+		if (!userBuilding) {
+			console.error("Building information is not available.");
+			// Provide appropriate user feedback here
+			return;
+		}
+
 		const bookingDocRef = doc(db, userBuilding, date);
-		const currentBooking = bookingsByDate[date].find((booking) =>
-			booking.bookedTimes.includes(bookingTime)
+		const auth = getAuth();
+		const currentUser = auth.currentUser;
+
+		if (!currentUser) {
+			console.error("No user is currently logged in.");
+			// Handle the case where there is no authenticated user
+			return;
+		}
+
+		// Find the specific booking for the current user and the specific time.
+		const currentBookingIndex = bookingsByDate[date]?.findIndex(
+			(booking) =>
+				booking.uid === currentUser.uid && booking.bookedTimes.includes(bookingTime)
 		);
 
-		if (currentBooking) {
-			// If it's the last number in the array or if the array only contains the number being deleted
-			if (
-				currentBooking.bookedTimes.length === 1 ||
-				(currentBooking.bookedTimes.length > 1 &&
-					currentBooking.bookedTimes.every((bt) => bt === bookingTime))
-			) {
-				// Remove the whole booking object from the Firestore document
-				await updateDoc(bookingDocRef, {
-					bookings: arrayRemove(currentBooking),
-				});
-			} else {
-				// Create a copy of the booking without the deleted time
-				const updatedBooking = {
-					...currentBooking,
-					bookedTimes: currentBooking.bookedTimes.filter((time) => time !== bookingTime),
-				};
-				// First remove the old booking object
-				await updateDoc(bookingDocRef, {
-					bookings: arrayRemove(currentBooking),
-				});
-				// Then add the updated booking object
-				await updateDoc(bookingDocRef, {
-					bookings: arrayUnion(updatedBooking),
-				});
-			}
+		// If the booking exists
+		if (currentBookingIndex > -1) {
+			try {
+				// Create a new array of bookings without the deleted time.
+				const newBookedTimes = bookingsByDate[date][
+					currentBookingIndex
+				].bookedTimes.filter((time) => time !== bookingTime);
 
-			// Update the state to reflect the deletion
-			setBookingsByDate((prevState) => {
-				const updatedBookings = { ...prevState };
-				const currentBookings = updatedBookings[date];
-
-				if (currentBookings) {
-					// Filter out the booking that contains the time to be deleted
-					const remainingBookings = currentBookings.filter(
-						(booking) => !booking.bookedTimes.includes(bookingTime)
+				let updatedBookings: Booking[];
+				if (newBookedTimes.length > 0) {
+					// Update the booking with the new array of times.
+					updatedBookings = bookingsByDate[date].map((booking, index) =>
+						index === currentBookingIndex
+							? { ...booking, bookedTimes: newBookedTimes }
+							: booking
 					);
-
-					if (remainingBookings.length > 0) {
-						// If there are remaining bookings, update the date entry
-						updatedBookings[date] = remainingBookings;
-					} else {
-						// If all bookings for the date have been deleted, remove the date entry
-						delete updatedBookings[date];
-					}
+				} else {
+					// Remove the booking entirely if no times are left.
+					updatedBookings = bookingsByDate[date].filter(
+						(_, index) => index !== currentBookingIndex
+					);
 				}
 
-				return updatedBookings;
-			});
+				// Update Firestore with the new array of bookings.
+				await setDoc(bookingDocRef, { bookings: updatedBookings }, { merge: true });
+
+				// Update the local state to reflect the changes.
+				setBookingsByDate((prevBookings) => ({
+					...prevBookings,
+					[date]: updatedBookings,
+				}));
+
+				// Reload the page if there are no more bookings for that date.
+				if (updatedBookings.length === 0) {
+					window.location.reload();
+				}
+			} catch (error) {
+				console.error("Error deleting booking:", error);
+				// Handle error (show error message to user)
+			}
+		} else {
+			console.error("Booking not found or already deleted.");
+			// Handle the case where the booking was not found or already deleted
 		}
 	};
 
@@ -329,6 +333,8 @@ const YourBookingsPage: React.FC = () => {
 								</IonCardHeader>
 								<IonCardContent>
 									{["Washer 1", "Washer 2", "Dryer"].map((washerGroup) => {
+										console.log(`IonList key: ${washerGroup}`);
+
 										// Filter and sort bookings for each washer group
 										const washerBookings = dailyBookings
 											.filter((booking) => getWasherGroup(booking.time) === washerGroup)
@@ -336,12 +342,10 @@ const YourBookingsPage: React.FC = () => {
 
 										return (
 											washerBookings.length > 0 && (
-												<IonList>
-													<div key={washerGroup}>
+												<IonList key={washerGroup}>
+													<div>
 														<h2>{washerGroup}</h2>
 														{washerBookings.map((booking, index) => (
-															//delete button
-
 															<IonItem key={`${date}-${booking.time}-${index}`}>
 																<IonLabel>{timeIntervals[booking.time - 1]}</IonLabel>
 																<IonButton

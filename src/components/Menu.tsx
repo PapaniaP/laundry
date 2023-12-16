@@ -1,19 +1,14 @@
 import React from "react";
 import {
-	IonButton,
 	IonContent,
-	IonFooter,
 	IonIcon,
 	IonItem,
 	IonLabel,
 	IonList,
 	IonListHeader,
 	IonMenu,
-	IonMenuButton,
 	IonMenuToggle,
-	IonNote,
 } from "@ionic/react";
-import { toastController } from "@ionic/core";
 
 import { useLocation } from "react-router-dom";
 import {
@@ -25,7 +20,7 @@ import {
 	personSharp,
 } from "ionicons/icons";
 import "./Menu.css";
-import { getAuth, signOut } from "firebase/auth";
+import { getAuth } from "firebase/auth";
 import { useAuth } from "./AuthContext";
 import { doc, getDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";

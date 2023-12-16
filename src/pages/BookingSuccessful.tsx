@@ -1,13 +1,4 @@
-import {
-	IonButton,
-	IonContent,
-	IonFooter,
-	IonHeader,
-	IonIcon,
-	IonPage,
-	IonTitle,
-	IonToolbar,
-} from "@ionic/react";
+import { IonButton, IonContent, IonIcon, IonPage, IonTitle } from "@ionic/react";
 import "./ErrorPage.css";
 import { checkmarkCircle } from "ionicons/icons";
 
