@@ -19,27 +19,30 @@ const TimeButton: React.FC<TimeButtonProps> = ({
 	id,
 }) => {
 	let buttonFill: "solid" | "outline" | "clear" | "default";
+	let buttonColor;
+
 	if (isSelected) {
-		buttonFill = "solid"; // or any other color to indicate selection
+		buttonFill = "solid";
+		buttonColor = "secondary"; // Adjust as necessary
 	} else if (isAvailable) {
 		buttonFill = "outline";
+		buttonColor = "secondary";
 	} else {
-		buttonFill = "outline";
+		buttonFill = "solid";
+		buttonColor = "medium";
 	}
 
-	let buttonColor;
-	if (isSelected) {
-		buttonColor = "primary"; // or any other color to indicate selection
-	} else if (isAvailable) {
-		buttonColor = "primary";
-	} else {
-		buttonColor = "danger";
-	}
+	// Compute the CSS class for the button
+	const buttonClasses = [
+		isSelected ? 'time-button-selected' : '',
+		!isAvailable ? 'time-button-disabled' : '',
+	].join(' ');
 
 	return (
 		<IonButton
+			className={buttonClasses} // Apply the class here
 			onClick={() => onButtonClick(value)}
-			disabled={!isAvailable} // disable button if not available
+			disabled={!isAvailable}
 			fill={buttonFill}
 			color={buttonColor}
 		>

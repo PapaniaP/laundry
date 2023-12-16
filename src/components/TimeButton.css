@@ -1,5 +1,17 @@
-ion-button {
+/* ion-button {
 	--border-width: 2px;
 	--border-style: solid;
 	--border-color: var(--ion-color-secondary);
+} */
+
+.time-button-selected {
+	--border-width: 2px;
+	--border-style: solid;
+	--border-color: var(--ion-color-secondary);
+}
+
+.time-button-disabled {
+	--border-width: 2px;
+	--border-style: solid;
+	--border-color: var(--ion-color-medium);
 }

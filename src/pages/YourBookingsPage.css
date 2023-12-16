@@ -32,8 +32,8 @@ ion-button {
 }
 
 ion-chip {
-	--background: var(--ion-color-primary-contrast);
-	--color: var(--ion-color-primary);
+	--background: var(--ion-color-medium);
+	--color: var(--ion-color-medium-contrast);
 }
 
 /* ion-toolbar {
@@ -42,8 +42,11 @@ ion-chip {
 } */
 
 .card-disabled {
-	--background: #e0e0e0; /* Or any color that signifies "disabled" */
-	--color: #a0a0a0; /* Optional: if you want to change the text color as well */
-	pointer-events: none; /* Optional: if you want to prevent interaction with the card */
+	--background: #e0e0e0;
+	/* Or any color that signifies "disabled" */
+	--color: #a0a0a0;
+	/* Optional: if you want to change the text color as well */
+	pointer-events: none;
+	/* Optional: if you want to prevent interaction with the card */
 	/* Add any other styles you want for the "disabled" state */
 }
