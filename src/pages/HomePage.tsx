@@ -35,18 +35,23 @@ export interface Booking {
 }
 
 function HomePage() {
-	const [userBuilding, setUserBuilding] = useState(""); // State to hold user's building number
 	const history = useHistory();
 	const auth = getAuth();
 
+	const [userBuilding, setUserBuilding] = useState(""); // State to hold user's building number
 	const [selectedValues, setSelectedValues] = useState<number[]>([]); // this is for updating array
 	const [bookings, setBookings] = useState<Booking[]>([]); // this is for fetching
 	const [Booking, setBooking] = useState<Booking>({
+		// Represents the current booking being created. It includes the user ID and the array of booked times. This state is updated as the user selects time slots.
+
 		uid: "",
 		bookedTimes: [],
 	});
 
 	useEffect(() => {
+		// This effect runs when the currentUser changes (i.e., on user login or logout).
+		// It fetches the building number of the authenticated user from the database,
+		// and sets the userBuilding state with that number for further use in the app.
 		if (auth.currentUser) {
 			// Fetch user's building number
 			const userRef = doc(db, "users", auth.currentUser.uid);
@@ -66,8 +71,9 @@ function HomePage() {
 	}, [auth.currentUser]);
 
 	// date picker
-
+	// Stores the currently selected date in ISO format. This date is used to fetch and display bookings for the selected day.
 	const [selectedDate, setSelectedDate] = useState<string>(formatISO(startOfToday()));
+	// Controls the visibility of the date picker modal. This state is toggled to show or hide the date picker.
 	const [showPicker, setShowPicker] = useState<boolean>(false);
 
 	const minDate = formatISO(startOfToday());
@@ -85,6 +91,7 @@ function HomePage() {
 
 	const dateToBeFetched = selectedDate.split("T")[0];
 
+	// This function handles the selection of time slots for booking
 	const handleButtonClick = (value: number) => {
 		setSelectedValues((prev) => {
 			// Check if the value is already selected
@@ -98,7 +105,7 @@ function HomePage() {
 					return [...prev, value];
 				} else {
 					// If 5 are already selected, do not add a new value
-					// Optionally, show an alert or some other form of user feedback
+					// show an alert or some other form of user feedback
 					alert("You can select up to 5 time slots only.");
 					return prev; // Return the previous state
 				}
@@ -157,10 +164,12 @@ function HomePage() {
 		}
 	};
 
-	// fetching data from database
-
-	// useEffect for fetching data from the database
 	useEffect(() => {
+		// This effect sets up a listener for booking data from the database.
+		// It runs whenever the selectedDate or userBuilding state changes.
+		// The listener fetches booking data for the selected date and specific user building,
+		// allowing the app to display current bookings and manage availability.
+
 		// Only set up the listener if userBuilding has been set and a date is selected
 		if (userBuilding && selectedDate) {
 			const formattedDate = selectedDate.split("T")[0]; // format the date to match your database format
@@ -192,8 +201,6 @@ function HomePage() {
 			return () => unsubscribe();
 		}
 	}, [selectedDate, userBuilding]); // Dependencies: selectedDate and userBuilding
-
-
 
 	return (
 		<IonPage>
@@ -227,6 +234,7 @@ function HomePage() {
 							<IonButton
 								className="bottom-button"
 								onClick={() => setShowPicker(true)}
+								aria-label="Select date for booking"
 							>
 								{selectedDate ? formatDateForDisplay(selectedDate) : "Select Date"}
 							</IonButton>

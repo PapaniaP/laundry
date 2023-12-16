@@ -125,6 +125,7 @@ const Menu: React.FC = () => {
 									routerDirection="none"
 									lines="none"
 									detail={false}
+									aria-label={`Navigate to ${appPage.title}`} // ARIA label for better screen reader support
 								>
 									<IonIcon
 										aria-hidden="true"
