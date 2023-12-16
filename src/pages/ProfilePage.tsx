@@ -176,6 +176,7 @@ const ProfilePage: React.FC = () => {
 							<IonItem>
 								<IonSelect
 									label="Select your Building"
+									aria-label="Select your Building" // ARIA label for screen readers
 									value={userData.building}
 									placeholder=""
 									onIonChange={(e) => handleBuildingChange(e.detail.value)}

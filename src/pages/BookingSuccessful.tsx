@@ -1,4 +1,4 @@
-import { IonButton, IonContent, IonIcon, IonPage, IonTitle } from "@ionic/react";
+import { IonButton, IonContent, IonIcon, IonPage, IonText, IonTitle } from "@ionic/react";
 import "./ErrorPage.css";
 import { checkmarkCircle } from "ionicons/icons";
 
@@ -12,11 +12,15 @@ const BookingSuccessful: React.FC = () => {
 							color="secondary"
 							size="large"
 							className="label-icon"
-							aria-hidden="true"
+							aria-label="Booking successful"
 							icon={checkmarkCircle}
 						></IonIcon>
-						<IonTitle className="ion-text-center titleheight">Congratulations!</IonTitle>
-						<p className="ion-text-center">You have created your booking successfully.</p>
+						<IonText>
+							<h1 className="ion-text-center titleheight">Congratulations!</h1>
+							<p className="ion-text-center">
+								You have created your booking successfully.
+							</p>
+						</IonText>
 					</div>
 				</div>
 			</IonContent>
@@ -26,6 +30,7 @@ const BookingSuccessful: React.FC = () => {
 					expand="block"
 					slot="end"
 					routerLink="/home"
+					aria-label="Book another time"
 				>
 					Book another time
 				</IonButton>
@@ -33,6 +38,7 @@ const BookingSuccessful: React.FC = () => {
 					expand="block"
 					slot="end"
 					routerLink="/bookings"
+					aria-label="See your booked times"
 				>
 					See your booked times
 				</IonButton>
