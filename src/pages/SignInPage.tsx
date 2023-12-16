@@ -98,6 +98,7 @@ const SignInPage: React.FC = () => {
 								placeholder="Email"
 								errorText="Invalid Email"
 								fill="outline"
+								aria-label="Email Address" // ARIA label for accessibility
 							/>
 
 							<IonInput
@@ -109,8 +110,9 @@ const SignInPage: React.FC = () => {
 								type="password"
 								placeholder="Password"
 								fill="outline"
+								aria-label="Password" // ARIA label for accessibility
 							/>
-						</IonList>{" "}
+						</IonList>
 						{error && (
 							<IonCardSubtitle
 								className="ion-padding-bottom"

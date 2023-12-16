@@ -351,6 +351,9 @@ const YourBookingsPage: React.FC = () => {
 																<IonButton
 																	onClick={() => deleteBooking(date, booking.time)}
 																	color="danger"
+																	aria-label={`Delete Booking for ${formatDate(
+																		date
+																	)} at ${timeIntervals[booking.time - 1]}`}
 																>
 																	Delete
 																	<IonIcon
