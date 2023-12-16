@@ -1,3 +1,4 @@
+import React from "react";
 import {
 	IonPage,
 	IonHeader,
@@ -112,11 +113,6 @@ function HomePage() {
 			}
 		});
 	};
-	// Since setSelectedValues is asynchronous, to see the current state after a click,
-	// you can use the useEffect hook with selectedValues as a dependency.
-	useEffect(() => {
-		console.log(selectedValues);
-	}, [selectedValues]);
 
 	//  sending data to firebase
 
@@ -171,11 +167,14 @@ function HomePage() {
 
 	// fetching data from database
 
+	// useEffect for fetching data from the database
 	useEffect(() => {
-		// Only set up the listener if userBuilding has been set
-		if (userBuilding) {
+		// Only set up the listener if userBuilding has been set and a date is selected
+		if (userBuilding && selectedDate) {
+			const formattedDate = selectedDate.split("T")[0]; // format the date to match your database format
+
 			// Construct the path to the document for the selected date
-			const dateDocRef = doc(db, userBuilding, dateToBeFetched);
+			const dateDocRef = doc(db, userBuilding, formattedDate);
 
 			// Start listening to the document
 			const unsubscribe = onSnapshot(
@@ -200,12 +199,9 @@ function HomePage() {
 			// Clean up the listener when the component unmounts
 			return () => unsubscribe();
 		}
-	}, [dateToBeFetched, userBuilding]); // Add userBuilding as a dependency
+	}, [selectedDate, userBuilding]); // Dependencies: selectedDate and userBuilding
 
-	useEffect(() => {
-		console.log(bookings);
-	}),
-		[bookings];
+
 
 	return (
 		<IonPage>

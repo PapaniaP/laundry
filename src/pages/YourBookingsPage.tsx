@@ -1,3 +1,4 @@
+import React from "react";
 import {
 	IonContent,
 	IonPage,
@@ -14,14 +15,9 @@ import {
 	IonLabel,
 	IonButton,
 	IonSpinner,
-	IonCardSubtitle,
 	IonList,
 	IonIcon,
-	IonText,
 	IonChip,
-	IonItemOptions,
-	IonItemOption,
-	IonItemSliding,
 } from "@ionic/react";
 import { alertController } from "@ionic/core";
 
@@ -214,11 +210,11 @@ const YourBookingsPage: React.FC = () => {
 				{
 					text: "Delete",
 					handler: async () => {
-						// Proceed with the deletion logic
-						await performDeletion(date, bookingTime);
+						// Pass userBuilding to performDeletion
+						await performDeletion(date, bookingTime, userBuilding);
 
-						// Refresh the page after deletion
-						window.location.reload();
+						// // Refresh the page after deletion
+						// window.location.reload();
 					},
 				},
 			],
@@ -227,8 +223,8 @@ const YourBookingsPage: React.FC = () => {
 		await alert.present();
 	};
 
-	const performDeletion = async (date: string, bookingTime: number) => {
-		const bookingDocRef = doc(db, "building-1", date);
+	const performDeletion = async (date: string, bookingTime: number, userBuilding: string) => {
+		const bookingDocRef = doc(db, userBuilding, date);
 		const currentBooking = bookingsByDate[date].find((booking) =>
 			booking.bookedTimes.includes(bookingTime)
 		);
@@ -284,7 +280,6 @@ const YourBookingsPage: React.FC = () => {
 			});
 		}
 	};
-	console.log("Grouped Bookings:", bookingsGroupedByDate);
 
 	if (loading) {
 		return (
