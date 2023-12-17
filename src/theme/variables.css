@@ -251,6 +251,6 @@ body.dark {
 }
 
 ion-toolbar {
-	--background: light;
+	--background: var(--ion-color-light);
 	--color: var(--ion-color-dark);
 }
